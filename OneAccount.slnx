@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OneAccount.Application/OneAccount.Application.csproj" Id="dae334a8-0305-4a04-97c9-07fe0e4b8f53" />
+    <Project Path="src/OneAccount.Domain/OneAccount.Domain.csproj" Id="431dfcd5-eef7-4e4a-9b8e-2d0b64502346" />
+    <Project Path="src/OneAccount.Infrastructure/OneAccount.Infrastructure.csproj" Id="884b848f-0b4b-4da9-a218-7c6d255fcfad" />
+    <Project Path="src/OneAccount.Presentation/oneaccount.presentation.client/oneaccount.presentation.client.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+    <Project Path="src/OneAccount.Presentation/OneAccount.Presentation.Server/OneAccount.Presentation.Server.csproj" Id="b662ecef-e463-41be-ae4c-e026458c4ce6" />
+  </Folder>
+</Solution>
