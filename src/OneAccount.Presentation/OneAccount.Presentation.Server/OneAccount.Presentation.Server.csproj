@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\OneAccount.Application\OneAccount.Application.csproj" />
     <ProjectReference Include="..\oneaccount.presentation.client\oneaccount.presentation.client.esproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>

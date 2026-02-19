@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OneAccount.Application\OneAccount.Application.csproj" />
+    <ProjectReference Include="..\OneAccount.Domain\OneAccount.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
