@@ -2,6 +2,6 @@
 
 public interface IUnityOfWork
 {
-    Task CommitAsync();
+    Task CommitAsync(CancellationToken cancellationToken = default);
 }
 

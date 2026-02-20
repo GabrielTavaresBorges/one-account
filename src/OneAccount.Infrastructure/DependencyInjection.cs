@@ -7,6 +7,8 @@ using OneAccount.Infrastructure.Data;
 using OneAccount.Infrastructure.Data.Context;
 using OneAccount.Infrastructure.Data.Repositories.UserRepository;
 
+namespace OneAccount.Infrastructure;
+
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
