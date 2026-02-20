@@ -12,5 +12,6 @@ public sealed class UnityOfWork : IUnityOfWork
         _context = context;
     }
 
-    public async Task CommitAsync() => await _context.SaveChangesAsync();
+    public async Task CommitAsync(CancellationToken cancellationToken = default)
+        => await _context.SaveChangesAsync(cancellationToken);
 }
