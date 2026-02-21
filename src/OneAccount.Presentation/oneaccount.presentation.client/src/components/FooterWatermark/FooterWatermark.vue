@@ -12,7 +12,7 @@
     width: 100%;
     text-align: center;
     font-size: 0.75rem;
-    color: #ffffff;
+    color: #5D4037;
     opacity: 0.7;
     z-index: 10;
     pointer-events: none; /* não atrapalha clique */
