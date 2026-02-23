@@ -4,9 +4,9 @@ using OneAccount.Domain.Entities.Users;
 
 namespace OneAccount.Infrastructure.Data.Mappings.UsersMap;
 
-public sealed class UsersMap : IEntityTypeConfiguration<User>
+public sealed class UsersMap : IEntityTypeConfiguration<Users>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<Users> builder)
     {
         builder.ToTable("Users");
         builder.HasKey(h => h.Id);
@@ -55,8 +55,16 @@ public sealed class UsersMap : IEntityTypeConfiguration<User>
         });
 
         // importante para backing field (private list)
-        builder.Navigation(u => u.Documents)
+        builder.Navigation(n => n.Documents)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.OwnsOne(o => o.BirthDate, bd =>
+        {
+            bd.Property(p => p.Value)
+              .HasColumnName("BirthDate")
+              .HasColumnType("date")
+              .IsRequired();
+        });
 
         builder.Property(p => p.CreatedAt)
             .HasColumnName("CreatedAt")

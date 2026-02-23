@@ -1,4 +1,4 @@
-<!-- src/pages/user-create.vue -->
+<!-- src/pages/UserCreatePage.vue -->
 <script setup lang="ts">
   import { computed, reactive, ref, watch } from 'vue'
   import {
@@ -13,6 +13,8 @@
     mdiCheckCircle,
     mdiCircleOutline,
   } from '@mdi/js'
+
+  import { createUser } from '@/services/users/users-service' 
 
   type VForm = { validate: () => Promise<{ valid: boolean }> }
 
@@ -91,14 +93,29 @@
     { immediate: true }
   )
 
-  /* minimal submit (visual only) */
   async function createAccount() {
+
     const validation = await formRef.value?.validate()
     if (validation && !validation.valid) {
       notify('Revise os campos obrigatórios.')
       return
     }
-    notify('Visual OK. Depois conectamos no seu UserController.')
+
+    const payload = {
+      userName: form.fullName.trim(),
+      emailAddress: form.email.trim(),
+      cpfNumber: form.cpf.replace(/\D/g, ''),
+    }
+
+    try {
+      loading.value = true
+      const result = await createUser(payload)
+      notify(result.message || 'Usuário criado com sucesso!')
+    } catch (e: any) {
+      notify(e?.message || 'Erro ao criar usuário.')
+    } finally {
+      loading.value = false
+    }
   }
 </script>
 

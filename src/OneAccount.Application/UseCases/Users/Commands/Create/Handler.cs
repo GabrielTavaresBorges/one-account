@@ -46,7 +46,7 @@ public sealed class Handler : IRequestHandler<Command, Result<Response>>
                 return Result<Response>.Failure(cpfResult.Error);
             }
 
-            var user = User.Create(
+            var user = Domain.Entities.Users.Users.Create(
                 userName: userNameResult.Value,
                 emailAddress: emailResult.Value,
                 cpfNumber: cpfResult.Value);

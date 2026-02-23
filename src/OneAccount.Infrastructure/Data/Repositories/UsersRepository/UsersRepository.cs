@@ -14,18 +14,18 @@ public sealed class UsersRepository : IUsersRepository
         _context = context;
     }
 
-    public async Task CreateUserAsync(User user, CancellationToken cancellationToken)
+    public async Task CreateUserAsync(Users user, CancellationToken cancellationToken)
     {
         await _context.Users.AddAsync(user, cancellationToken);
     }
 
-    public Task UpdateUserAsync(User user, CancellationToken cancellationToken)
+    public Task UpdateUserAsync(Users user, CancellationToken cancellationToken)
     {
         _context.Users.Update(user);
         return Task.CompletedTask;
     }
 
-    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Users?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
