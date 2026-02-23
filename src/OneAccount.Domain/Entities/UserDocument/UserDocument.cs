@@ -25,7 +25,7 @@ public sealed class UserDocument : Entity
     internal static UserDocument CreateFromCpf(Cpf cpf)
     {
         if (cpf is null)
-            throw new DomainException(message: "Cpf cannot be null.", identifier: "CPF_NULL");
+            throw new DomainException(message:"Cpf cannot be null.", identifier:"CPF_NULL");
 
         return new UserDocument(DocumentType.Cpf, cpf.Number);
     }

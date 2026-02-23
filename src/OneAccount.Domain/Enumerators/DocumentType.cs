@@ -2,7 +2,7 @@
 
 public enum DocumentType
 {
-    None,    // Nenhum
+    Unknown, // Desconhecido
     Cpf,     // Cadastro de Pessoas Físicas
     Rg,      // Registro Geral
     Cnh,     // Carteira Nacional de Habilitação

@@ -5,7 +5,7 @@ namespace OneAccount.Infrastructure.Data.Context;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<User> Users => Set<User>();
+    public DbSet<Users> Users => Set<Users>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
