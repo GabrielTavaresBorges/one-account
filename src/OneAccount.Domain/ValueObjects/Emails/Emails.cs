@@ -5,8 +5,8 @@ namespace OneAccount.Domain.ValueObjects.Emails;
 
 public sealed partial record Email
 {
-    public string EmailAddress { get; }
-    private const int MaxLength = 254;
+    public string EmailAddress { get; private init; }
+    private Email() { }
 
     private Email(string value)
     {
@@ -38,6 +38,7 @@ public sealed partial record Email
         email = email.Trim();
 
         // limite comum (prático)
+        const int MaxLength = 60;
         if (email.Length > MaxLength)
         {
             return Result<string>.Failure(new Error(

@@ -102,9 +102,11 @@
     }
 
     const payload = {
-      userName: form.fullName.trim(),
-      emailAddress: form.email.trim(),
+      email: form.email.trim(),
+      password: form.password.trim(),
+      userName: form.fullName.trim(),      
       cpfNumber: form.cpf.replace(/\D/g, ''),
+      birthDate: form.birthDate,
     }
 
     try {
@@ -225,14 +227,7 @@
                                     persistent-hint
                                     variant="outlined"
                                     rounded="lg"
-                                    density="comfortable" />
-
-                      <v-text-field v-model="form.rg"
-                                    label="RG"
-                                    class="mb-4"
-                                    variant="outlined"
-                                    rounded="lg"
-                                    density="comfortable" />
+                                    density="comfortable" />                      
 
                       <v-text-field v-model="form.birthDate"
                                     label="Data de nascimento"

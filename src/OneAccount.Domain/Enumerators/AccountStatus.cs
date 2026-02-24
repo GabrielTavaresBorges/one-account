@@ -2,7 +2,7 @@
 
 public enum AccountStatus
 {
-    Unknown,   // Desconecido
+    Unknown,   // Desconhecido
     Active,    // Ativo
     Suspended, // Suspenso
     Disabled   // Desativado

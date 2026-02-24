@@ -11,7 +11,7 @@ public sealed class CommandValidator : AbstractValidator<Command>
             .MinimumLength(2)
             .MaximumLength(100);
 
-        RuleFor(x => x.EmailAddress)
+        RuleFor(x => x.Email)
             .NotEmpty()
             .MaximumLength(150)
             .EmailAddress();

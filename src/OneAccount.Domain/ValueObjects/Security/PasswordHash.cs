@@ -1,29 +1,48 @@
-﻿using OneAccount.Domain.Abstraction.Exceptions;
+﻿using OneAccount.Domain.Abstraction.Records;
 
 namespace OneAccount.Domain.ValueObjects.Security;
 
 public sealed record PasswordHash
 {
-    public string Value { get; }
+    public string Password { get; }
 
-    private PasswordHash(string value)
+    private PasswordHash(string password)
     {
-        Value = value;
+        Password = password;
     }
 
-    /// <summary>
-    /// Cria um PasswordHash a partir de um hash já gerado (ex.: Argon2/BCrypt/PBKDF2).
-    /// O domínio não gera hash, apenas valida e armazena.
-    /// </summary>
-    public static PasswordHash FromHash(string value)
+    public static Result<PasswordHash> Create(string value)
+    {
+        var validatedPassword = Validate(value);
+
+        if (validatedPassword.IsFailure)
+            return Result<PasswordHash>.Failure(validatedPassword.Error);
+
+        return Result<PasswordHash>.Success(new PasswordHash(value));
+    }
+
+    private static Result<string> Validate(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new DomainException("Password hash cannot be null or empty.", "PASSWORD_HASH_EMPTY");
+        {
+            return Result<string>.Failure(new Error(
+                Identifier: "PASSWORD_HASH_EMPTY",
+                Message: "Password hash cannot be null or empty."));
+        }
 
-        // Limite defensivo (hashes costumam ser bem menores; isso evita payloads absurdos)
-        if (value.Length > 1024)
-            throw new DomainException("Password hash is too long.", "PASSWORD_HASH_TOO_LONG");
+        value = value.Trim();
 
-        return new PasswordHash(value);
+        const int MaxLength = 1024;
+        if (value.Length > MaxLength)
+        {
+            return Result<string>.Failure(new Error(
+                Identifier: "PASSWORD_HASH_TOO_LONG",
+                Message: "Password hash is too long.\n" +
+                         $"Current length: {value.Length} characters.\n" +
+                         $"Maximum allowed length: {MaxLength} characters."
+            ));
+        }
+
+        return Result<string>.Success(value);
     }
 }

@@ -5,11 +5,13 @@ namespace OneAccount.Domain.ValueObjects.Accounts;
 
 public sealed record SuspensionInfo
 {
-    public SuspensionReason Reason { get; }
-    public SuspensionBy By { get; }
-    public DateTimeOffset SuspendedAt { get; }
-    public DateTimeOffset? SuspendedUntil { get; }
-    public string? Note { get; }
+    public SuspensionReason? Reason { get; private init; }
+    public SuspensionBy? By { get; private init; }
+    public DateTimeOffset? SuspendedAt { get; private init; }
+    public DateTimeOffset? SuspendedUntil { get; private init; }
+    public string? Note { get; private init; }
+
+    private SuspensionInfo() { }
 
     private SuspensionInfo(
         SuspensionReason reason,
