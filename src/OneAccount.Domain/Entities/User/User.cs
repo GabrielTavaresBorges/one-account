@@ -10,11 +10,11 @@ using OneAccount.Domain.ValueObjects.Emails;
 using OneAccount.Domain.ValueObjects.Names;
 using OneAccount.Domain.ValueObjects.Security;
 
-namespace OneAccount.Domain.Entities.Users;
+namespace OneAccount.Domain.Entities.User;
 
-public class Users : Entity, IAggregateRoot
+public class User : Entity, IAggregateRoot
 {
-    private Email _emailAddress = null!;
+    private Email _email = null!;
     private UserName _userName = null!;
     private PasswordHash _passwordHash = null!;
     private BirthDate _birthDate = null!;
@@ -23,7 +23,7 @@ public class Users : Entity, IAggregateRoot
 
     private readonly List<UserDocument> _documents = new();
 
-    public Email Email => _emailAddress;
+    public Email Email => _email;
     public PasswordHash PasswordHash => _passwordHash;
     public UserName UserName => _userName;
     public BirthDate BirthDate => _birthDate;
@@ -33,23 +33,24 @@ public class Users : Entity, IAggregateRoot
 
     public IReadOnlyCollection<UserDocument> Documents => _documents.AsReadOnly();
 
-    private Users() { }
+    private User() { }
 
-    private Users(
+    private User(
         Email email,
         PasswordHash passwordHash,
         UserName userName,
         BirthDate birthDate)
     {
-        _emailAddress = email;
+        _email = email;
         _passwordHash = passwordHash;
         _userName = userName;
         _birthDate = birthDate;
 
+        _status = AccountStatus.Active;
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
-    public static Users Create(
+    public static User Create(
         Email emailAddress,
         PasswordHash passwordHash,
         UserName userName,
@@ -71,7 +72,7 @@ public class Users : Entity, IAggregateRoot
         if (birthDate is null)
             throw new DomainException(message:"Birth date cannot be null.", identifier:"BIRTH_DATE_NULL");
 
-        var user = new Users(emailAddress, passwordHash, userName, birthDate);
+        var user = new User(emailAddress, passwordHash, userName, birthDate);        
         user._documents.Add(UserDocument.CreateFromCpf(cpfNumber));
 
         return user;
@@ -82,7 +83,7 @@ public class Users : Entity, IAggregateRoot
         if (email is null)
             throw new DomainException(message:"Email cannot be null.", identifier:"EMAIL_NULL");
 
-        _emailAddress = email;
+        _email = email;
     }
 
     public void ChangePasswordHash(PasswordHash passwordHash)

@@ -4,11 +4,15 @@ namespace OneAccount.Domain.ValueObjects.Documents;
 
 public sealed record Cpf
 {
-    public string Number { get; }
+    public string Number { get; private init; }
+
+    private Cpf() { }
+
     private Cpf(string number)
     {
         Number = number;
     }
+
     public static Result<Cpf> Create(string number)
     {
         var validatedNumber = ValidateNumber(number);

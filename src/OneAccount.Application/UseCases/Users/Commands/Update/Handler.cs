@@ -11,13 +11,13 @@ namespace OneAccount.Application.UseCases.Users.Commands.Update;
 
 public sealed class Handler : IRequestHandler<Command, Result<Response>>
 {
-    private readonly IUsersRepository _usersRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUnityOfWork _unitOfWork;
     private readonly ILogger<Handler> _logger;
 
-    public Handler(IUsersRepository usersRepository, IUnityOfWork unitOfWork, ILogger<Handler> logger)
+    public Handler(IUserRepository usersRepository, IUnityOfWork unitOfWork, ILogger<Handler> logger)
     {
-        _usersRepository = usersRepository;
+        _userRepository = usersRepository;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -28,7 +28,7 @@ public sealed class Handler : IRequestHandler<Command, Result<Response>>
         {
             // 1) Carrega o usuário atual
             // Ajuste o nome do método conforme seu repositório (ex.: GetByIdAsync / FindByIdAsync)
-            var user = await _usersRepository.GetByIdAsync(command.Id, cancellationToken);
+            var user = await _userRepository.GetByIdAsync(command.Id, cancellationToken);
             if (user is null)
             {
                 return Result<Response>.Failure(
@@ -52,12 +52,12 @@ public sealed class Handler : IRequestHandler<Command, Result<Response>>
                 }
             }
 
-            if (command.EmailAddress is not null)
+            if (command.Email is not null)
             {
                 // Se quiser evitar marcar como atualizado quando for igual ao atual:
-                if (!string.Equals(user.Email.EmailAddress, command.EmailAddress, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(user.Email.EmailAddress, command.Email, StringComparison.OrdinalIgnoreCase))
                 {
-                    var emailResult = Email.Create(command.EmailAddress);
+                    var emailResult = Email.Create(command.Email);
                     if (emailResult.IsFailure)
                         return Result<Response>.Failure(emailResult.Error);
 
@@ -81,7 +81,7 @@ public sealed class Handler : IRequestHandler<Command, Result<Response>>
             // 4) Persistência
             // Se você usa EF Core e o user já está rastreado, pode nem precisar chamar Update.
             // Ajuste conforme seu repositório:
-            await _usersRepository.UpdateUserAsync(user, cancellationToken);
+            await _userRepository.UpdateUserAsync(user, cancellationToken);
 
             await _unitOfWork.CommitAsync(cancellationToken);
 

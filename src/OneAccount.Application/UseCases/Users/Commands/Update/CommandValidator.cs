@@ -10,7 +10,7 @@ public sealed class CommandValidator : AbstractValidator<Command>
             .NotEmpty();
 
         RuleFor(x => x)
-            .Must(x => !string.IsNullOrWhiteSpace(x.UserName) || !string.IsNullOrWhiteSpace(x.EmailAddress))
+            .Must(x => !string.IsNullOrWhiteSpace(x.UserName) || !string.IsNullOrWhiteSpace(x.Email))
             .WithMessage("Provide at least one field to update (UserName or EmailAddress).");
 
         When(x => x.UserName is not null, () =>
@@ -21,9 +21,9 @@ public sealed class CommandValidator : AbstractValidator<Command>
                 .MaximumLength(100);
         });
 
-        When(x => x.EmailAddress is not null, () =>
+        When(x => x.Email is not null, () =>
         {
-            RuleFor(x => x.EmailAddress)
+            RuleFor(x => x.Email)
                 .NotEmpty()
                 .MaximumLength(150)
                 .EmailAddress();

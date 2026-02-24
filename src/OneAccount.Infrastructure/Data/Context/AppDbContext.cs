@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OneAccount.Domain.Entities.Users;
+using OneAccount.Domain.Entities.User;
 
 namespace OneAccount.Infrastructure.Data.Context;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<Users> Users => Set<Users>();
+    public DbSet<User> User => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

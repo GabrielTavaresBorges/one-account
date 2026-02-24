@@ -5,9 +5,11 @@ export type UserId = string
 
 /** Campos base usados no CREATE */
 export type UserCreateCore = {
-  userName: string
-  emailAddress: string
+  email: string
+  password: string
+  userName: string  
   cpfNumber: string
+  birthDate: string
 }
 
 /** ===== CREATE ===== */
@@ -27,7 +29,7 @@ export type CreateUserResponse = {
  */
 export type UpdateUserRequest = {
   userName?: string 
-  emailAddress?: string
+  email?: string
 }
 
 /** Campos retornados pelo Update (conforme seu handler) */
