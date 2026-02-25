@@ -20,6 +20,8 @@ public sealed class UserDocument : Entity
     {
         _documentType = documentType;
         _documentNumber = documentNumber;
+
+        CreatedAt = DateTimeOffset.UtcNow;
     }
 
     internal static UserDocument CreateFromCpf(Cpf cpf)

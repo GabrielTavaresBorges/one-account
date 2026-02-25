@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OneAccount.Domain.Entities.User;
+using OneAccount.Domain.Enumerators;
 using OneAccount.Domain.ValueObjects.Accounts;
 
 namespace OneAccount.Infrastructure.Data.Mappings.UserMap;
@@ -63,6 +64,7 @@ public sealed class UserMap : IEntityTypeConfiguration<User>
         builder.Property(p => p.Status)
             .HasColumnName("Status")
             .HasConversion<string>()
+            .HasMaxLength(50)
             .IsRequired();
 
         // ===== SuspensionInfo (nullable) =====
@@ -103,8 +105,10 @@ public sealed class UserMap : IEntityTypeConfiguration<User>
 
             doc.WithOwner().HasForeignKey("UserId");
 
-            doc.Property(p => p.DocumentType)
+            doc.Property<DocumentType>("_documentType")
                 .HasColumnName("DocumentType")
+                .HasConversion<string>()
+                .HasMaxLength(50)
                 .IsRequired();
 
             doc.Property(p => p.DocumentNumber)
