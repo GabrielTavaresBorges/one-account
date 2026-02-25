@@ -2,7 +2,7 @@
 
 public enum SuspensionBy
 {
-    Unknown, // Desconecido
+    Unknown, // Descohnecido
     System,  // Sistema
     User,    // Usuário
     Admin    // Administrador
