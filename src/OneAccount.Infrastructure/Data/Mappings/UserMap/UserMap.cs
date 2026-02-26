@@ -67,6 +67,13 @@ public sealed class UserMap : IEntityTypeConfiguration<User>
             .HasMaxLength(50)
             .IsRequired();
 
+        // ===== Gender (enum) =====
+        builder.Property(p => p.Gender)
+            .HasColumnName("Gender")
+            .HasConversion<string>()
+            .HasMaxLength(50)
+            .IsRequired();
+
         // ===== SuspensionInfo (nullable) =====
         builder.OwnsOne(typeof(SuspensionInfo),"_suspension",si =>
         {

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using OneAccount.Domain.Abstraction.Records;
+using OneAccount.Domain.Enumerators;
 
 namespace OneAccount.Application.UseCases.Users.Commands.Create;
 
@@ -8,6 +9,7 @@ public sealed record Command(
     string Password,
     string UserName,    
     string CpfNumber,
-    DateOnly BirthDate) : IRequest<Result<Response>>
+    DateOnly BirthDate, 
+    Gender Gender) : IRequest<Result<Response>>
 {
 }

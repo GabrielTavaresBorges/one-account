@@ -65,7 +65,8 @@ public sealed class Handler : IRequestHandler<Command, Result<Response>>
                 passwordHash: passwordResult.Value,
                 userName: userNameResult.Value,
                 cpfNumber: cpfResult.Value,
-                birthDate: birhDateResult.Value);
+                birthDate: birhDateResult.Value,
+                gender: command.Gender);
 
             await _userRepository.CreateUserAsync(user, cancellationToken);
             await _unitOfWork.CommitAsync();

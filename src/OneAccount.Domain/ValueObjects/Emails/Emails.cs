@@ -38,7 +38,7 @@ public sealed partial record Email
         email = email.Trim();
 
         // limite comum (prático)
-        const int MaxLength = 60;
+        const int MaxLength = 254;
         if (email.Length > MaxLength)
         {
             return Result<string>.Failure(new Error(
