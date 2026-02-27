@@ -1,6 +1,7 @@
 <!-- src/pages/UserCreatePage.vue -->
+
 <script setup lang="ts">
-  import { computed, reactive, ref, watch } from 'vue'
+  import { computed, reactive, ref, watch, nextTick } from 'vue'
   import {
     mdiAccountCircleOutline,
     mdiInformationOutline,
@@ -12,14 +13,28 @@
     mdiShieldLockOutline,
     mdiCheckCircle,
     mdiCircleOutline,
+    mdiCalendar
   } from '@mdi/js'
 
-  import { createUser } from '@/services/users/users-service' 
+  import { createUser } from '@/services/users/users-service'
+  import { rules } from '@/validators'
+  import { GenderSelect, CpfField } from '@/components/inputs'
+  import type { Gender } from '@/constants/gender'
 
   type VForm = { validate: () => Promise<{ valid: boolean }> }
 
+  const birthDateFieldRules = computed(() => [
+    () => {
+      for (const r of rules.birthDate) {
+        const res = r(form.birthDate)
+        if (res !== true) return res
+      }
+      return true
+    },
+  ])
+
   /* panels */
-  const openedPanels = ref<number[]>([0])
+  const openedPanels = ref<string[]>(['accessData'])
 
   /* refs */
   const formRef = ref<VForm | null>(null)
@@ -45,7 +60,8 @@
     fullName: '',
     cpf: '',
     rg: '',
-    birthDate: '',
+    birthDate: null as Date | null,
+    gender: null as Gender | null,
     cep: '',
     address: '',
     city: '',
@@ -68,6 +84,23 @@
       digitRegex.test(p) &&
       specialRegex.test(p)
     )
+  })
+
+  /* birth date picker */
+  const birthMenu = ref(false)
+
+  const birthLabel = computed(() => {
+    if (!form.birthDate) return 'Selecione uma data'
+    return new Intl.DateTimeFormat('pt-BR').format(form.birthDate)
+  })
+
+  // string YYYY-MM-DD para enviar no backend
+  const birthDateIso = computed(() => {
+    if (!form.birthDate) return ''
+    const y = form.birthDate.getFullYear()
+    const m = String(form.birthDate.getMonth() + 1).padStart(2, '0')
+    const d = String(form.birthDate.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
   })
 
   const passwordRules = ref([
@@ -93,21 +126,63 @@
     { immediate: true }
   )
 
+  function runRules(ruleList: Array<(v: any) => true | string>, value: any) {
+    for (const rule of ruleList) {
+      const response = rule(value)
+      if (response !== true) return response
+    }
+    return true
+  }
+
+  function getPanelsWithErrors(): string[] {
+    const panels = new Set<string>()
+
+    // DADOS DE ACESSO
+    if (runRules(rules.email, form.email) !== true) panels.add('accessData')
+    
+    // DADOS PESSOAIS
+    if (runRules(rules.fullName, form.fullName) !== true) panels.add('personalData')
+    if (runRules(rules.gender, form.gender) !== true) panels.add('personalData')
+
+    for (const fn of birthDateFieldRules.value) {
+      if (fn() !== true) {
+        panels.add('personalData')
+        break
+      }
+    }
+
+    // DOCUMENTOS 
+    if (rules.cpf && runRules(rules.cpf, form.cpf) !== true) panels.add('documents')
+
+    return [...panels]
+  }
+
   async function createAccount() {
 
+    // 1) abre painéis que certamente têm erro (mesmo fechados)
+    const panelsToOpen = getPanelsWithErrors()
+    if (panelsToOpen.length) {
+      openedPanels.value = Array.from(new Set([...openedPanels.value, ...panelsToOpen]))
+      await nextTick() // espera o Vue renderizar os campos dos painéis abertos
+    }
+
+    // 2) valida o que estiver montado agora (inclui os painéis recém-abertos)
     const validation = await formRef.value?.validate()
     if (validation && !validation.valid) {
       notify('Revise os campos obrigatórios.')
       return
     }
 
+    // 3) segue fluxo normal
     const payload = {
       email: form.email.trim(),
       password: form.password.trim(),
-      userName: form.fullName.trim(),      
+      userName: form.fullName.trim(),
       cpfNumber: form.cpf.replace(/\D/g, ''),
-      birthDate: form.birthDate,
+      birthDate: birthDateIso.value,
+      gender: form.gender,
     }
+        
 
     try {
       loading.value = true
@@ -158,7 +233,7 @@
               <v-form ref="formRef" @submit.prevent="createAccount">
                 <v-expansion-panels v-model="openedPanels" multiple class="mb-6 panels">
                   <!-- DADOS DE ACESSO -->
-                  <v-expansion-panel class="panel">
+                  <v-expansion-panel class="panel" value="accessData">
                     <v-expansion-panel-title class="section-title">
                       Dados de acesso
                     </v-expansion-panel-title>
@@ -171,7 +246,9 @@
                                     class="mb-4"
                                     variant="outlined"
                                     rounded="lg"
-                                    density="comfortable" />
+                                    density="comfortable"
+                                    :rules="rules.email"
+                                    clearable />
 
                       <v-text-field v-model="form.password"
                                     label="Senha"
@@ -182,7 +259,8 @@
                                     class="mb-2"
                                     variant="outlined"
                                     rounded="lg"
-                                    density="comfortable">
+                                    density="comfortable"
+                                    clearable>
                         <template #append>
                           <v-btn variant="text"
                                  class="help-icon-btn"
@@ -202,44 +280,83 @@
                                     @click:append-inner="showConfirmPassword = !showConfirmPassword"
                                     variant="outlined"
                                     rounded="lg"
-                                    density="comfortable" />
+                                    density="comfortable"
+                                    clearable />
                     </v-expansion-panel-text>
                   </v-expansion-panel>
 
                   <!-- DADOS PESSOAIS -->
-                  <v-expansion-panel class="panel">
+                  <v-expansion-panel class="panel" value="personalData">
                     <v-expansion-panel-title class="section-title">
                       Dados pessoais
                     </v-expansion-panel-title>
 
-                    <v-expansion-panel-text>
+                    <v-expansion-panel-text eager>
                       <v-text-field v-model="form.fullName"
                                     label="Nome completo"
                                     class="mb-4"
                                     variant="outlined"
                                     rounded="lg"
-                                    density="comfortable" />
+                                    density="comfortable"
+                                    clearable
+                                    :rules="rules.fullName" />
+                      <v-row>
+                        <v-col cols="12" sm="7">
+                          <v-menu v-model="birthMenu"
+                                  :close-on-content-click="false"
+                                  location="bottom"
+                                  transition="scale-transition"
+                                  min-width="auto">
+                            <template #activator="{ props }">
+                              <v-text-field v-bind="props"
+                                            :model-value="birthLabel"
+                                            label="Data de nascimento"
+                                            readonly
+                                            variant="outlined"
+                                            rounded="lg"
+                                            density="comfortable"
+                                            clearable
+                                            :rules="birthDateFieldRules"
+                                            :prepend-inner-icon="mdiCalendar" />
+                            </template>
 
-                      <v-text-field v-model="form.cpf"
-                                    label="CPF"
-                                    class="mb-4"
-                                    hint="Somente números"
-                                    persistent-hint
-                                    variant="outlined"
-                                    rounded="lg"
-                                    density="comfortable" />                      
+                            <v-card min-width="300" max-width="340" elevation="12" rounded="lg">
+                              <v-date-picker :model-value="form.birthDate"
+                                             locale="pt-BR"
+                                             hide-header
+                                             flat
+                                             @update:model-value="(val) => { form.birthDate = val; birthMenu.value = false }" />
+                            </v-card>
+                          </v-menu>
+                        </v-col>
 
-                      <v-text-field v-model="form.birthDate"
-                                    label="Data de nascimento"
-                                    type="date"
-                                    variant="outlined"
-                                    rounded="lg"
-                                    density="comfortable" />
+                        <v-col cols="12" sm="5">
+                          <GenderSelect v-model="form.gender" :rules="rules.gender" clearable />
+                        </v-col>
+                      </v-row>
                     </v-expansion-panel-text>
                   </v-expansion-panel>
 
+                  <!-- DOCUMENTOS -->
+                  <v-expansion-panel class="panel" value="documents">
+                    <v-expansion-panel-title class="section-title">
+                      Documentos
+                    </v-expansion-panel-title>
+
+                    <v-expansion-panel-text>
+                      <CpfField v-model="form.cpf"
+                                :rules="rules.cpf"
+                                class="mb-4"
+                                variant="outlined"
+                                rounded="lg"
+                                density="comfortable"
+                                clearable />
+                    </v-expansion-panel-text>
+                  </v-expansion-panel>
+
+
                   <!-- ENDEREÇO -->
-                  <v-expansion-panel class="panel">
+                  <v-expansion-panel class="panel" value="address">
                     <v-expansion-panel-title class="section-title">
                       Endereço
                     </v-expansion-panel-title>
@@ -285,7 +402,7 @@
                   </v-expansion-panel>
 
                   <!-- CONTATO -->
-                  <v-expansion-panel class="panel">
+                  <v-expansion-panel class="panel" value="contact">
                     <v-expansion-panel-title class="section-title">
                       Contato
                     </v-expansion-panel-title>
@@ -473,6 +590,12 @@
     color: #214b3a;
     font-weight: 650;
     text-transform: none;
+  }
+
+  /* ===== BIRTH DATE ===== */
+  .birth-activator {
+    cursor: pointer;
+    min-height: 56px;
   }
 
   /* ===== PASSWORD DIALOG ===== */

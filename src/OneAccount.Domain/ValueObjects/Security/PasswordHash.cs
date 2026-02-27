@@ -11,38 +11,21 @@ public sealed record PasswordHash
         Password = password;
     }
 
-    public static Result<PasswordHash> Create(string value)
+    public static Result<PasswordHash> Create(string passwordHash)
     {
-        var validatedPassword = Validate(value);
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            return Result<PasswordHash>.Failure(new Error(
+                "PASSWORD_HASH_EMPTY",
+                "Password hash cannot be null or empty."));
 
-        if (validatedPassword.IsFailure)
-            return Result<PasswordHash>.Failure(validatedPassword.Error);
-
-        return Result<PasswordHash>.Success(new PasswordHash(value));
-    }
-
-    private static Result<string> Validate(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return Result<string>.Failure(new Error(
-                Identifier: "PASSWORD_HASH_EMPTY",
-                Message: "Password hash cannot be null or empty."));
-        }
-
-        value = value.Trim();
+        passwordHash = passwordHash.Trim();
 
         const int MaxLength = 1024;
-        if (value.Length > MaxLength)
-        {
-            return Result<string>.Failure(new Error(
-                Identifier: "PASSWORD_HASH_TOO_LONG",
-                Message: "Password hash is too long.\n" +
-                         $"Current length: {value.Length} characters.\n" +
-                         $"Maximum allowed length: {MaxLength} characters."
-            ));
-        }
+        if (passwordHash.Length > MaxLength)
+            return Result<PasswordHash>.Failure(new Error(
+                "PASSWORD_HASH_TOO_LONG",
+                $"Password hash is too long. Current length: {passwordHash.Length}. Max: {MaxLength}."));
 
-        return Result<string>.Success(value);
+        return Result<PasswordHash>.Success(new PasswordHash(passwordHash));
     }
 }

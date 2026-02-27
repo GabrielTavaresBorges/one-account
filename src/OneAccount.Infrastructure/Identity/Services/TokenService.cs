@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using OneAccount.Application.Services.Interfaces;
+using OneAccount.Application.Services.Security.Interfaces;
 using OneAccount.Infrastructure.Identity.Models;
 
 namespace OneAccount.Infrastructure.Identity.Services;

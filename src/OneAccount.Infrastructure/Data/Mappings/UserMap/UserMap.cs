@@ -30,7 +30,7 @@ public sealed class UserMap : IEntityTypeConfiguration<User>
         {
             pw.Property(p => p.Password)
               .HasColumnName("PasswordHash")
-              .HasMaxLength(256) // ajuste conforme tamanho do hash
+              .HasMaxLength(1024) 
               .IsRequired();
         });
 
@@ -63,6 +63,13 @@ public sealed class UserMap : IEntityTypeConfiguration<User>
         // ===== Status (enum) =====
         builder.Property(p => p.Status)
             .HasColumnName("Status")
+            .HasConversion<string>()
+            .HasMaxLength(50)
+            .IsRequired();
+
+        // ===== Gender (enum) =====
+        builder.Property(p => p.Gender)
+            .HasColumnName("Gender")
             .HasConversion<string>()
             .HasMaxLength(50)
             .IsRequired();

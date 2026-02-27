@@ -19,6 +19,7 @@ public class User : Entity, IAggregateRoot
     private PasswordHash _passwordHash = null!;
     private BirthDate _birthDate = null!;
     private AccountStatus _status;
+    private Gender _gender;
     private SuspensionInfo? _suspension;
 
     private readonly List<UserDocument> _documents = new();
@@ -28,6 +29,7 @@ public class User : Entity, IAggregateRoot
     public UserName UserName => _userName;
     public BirthDate BirthDate => _birthDate;
     public AccountStatus Status => _status;
+    public Gender Gender => _gender;
     public SuspensionInfo? SuspensionInfo => _suspension;
     public DateTimeOffset CreatedAt { get; private set; }
 
@@ -39,12 +41,14 @@ public class User : Entity, IAggregateRoot
         Email email,
         PasswordHash passwordHash,
         UserName userName,
-        BirthDate birthDate)
+        BirthDate birthDate,
+        Gender gender)
     {
         _email = email;
         _passwordHash = passwordHash;
         _userName = userName;
         _birthDate = birthDate;
+        _gender = gender;
 
         _status = AccountStatus.Active;
         CreatedAt = DateTimeOffset.UtcNow;
@@ -55,7 +59,8 @@ public class User : Entity, IAggregateRoot
         PasswordHash passwordHash,
         UserName userName,
         Cpf cpfNumber,
-        BirthDate birthDate)
+        BirthDate birthDate,
+        Gender gender)
     {
         if (emailAddress is null)
             throw new DomainException(message:"Email Address cannot be null.", identifier:"EMAIL_NULL");
@@ -72,7 +77,10 @@ public class User : Entity, IAggregateRoot
         if (birthDate is null)
             throw new DomainException(message:"Birth date cannot be null.", identifier:"BIRTH_DATE_NULL");
 
-        var user = new User(emailAddress, passwordHash, userName, birthDate);        
+        if (gender == Gender.Unknown)
+            throw new DomainException(message: "Gender cannot be unknown.", identifier: "GENDER_UNKNOWN");
+
+        var user = new User(emailAddress, passwordHash, userName, birthDate, gender);        
         user._documents.Add(UserDocument.CreateFromCpf(cpfNumber));
 
         return user;
@@ -108,5 +116,18 @@ public class User : Entity, IAggregateRoot
             throw new DomainException(message:"Birth date cannot be null.", identifier:"BIRTH_DATE_NULL");
 
         _birthDate = birthDate;
+    }
+
+    public void ChangeGender(Gender gender)
+    {
+        if (gender == Gender.Unknown)
+            throw new DomainException(
+                message: "Gender cannot be unknown.",
+                identifier: "GENDER_UNKNOWN");
+
+        if (_gender == gender)
+            return;
+
+        _gender = gender;
     }
 }
