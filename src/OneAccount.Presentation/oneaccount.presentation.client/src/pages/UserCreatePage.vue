@@ -1,6 +1,7 @@
 <!-- src/pages/UserCreatePage.vue -->
+
 <script setup lang="ts">
-  import { computed, reactive, ref, watch } from 'vue'
+  import { computed, reactive, ref, watch, nextTick } from 'vue'
   import {
     mdiAccountCircleOutline,
     mdiInformationOutline,
@@ -17,10 +18,11 @@
 
   import { createUser } from '@/services/users/users-service'
   import { rules } from '@/validators'
-  import GenderSelect from '@/components/inputs/GenderSelect.vue'
+  import { GenderSelect, CpfField } from '@/components/inputs'
+  import type { Gender } from '@/constants/gender'
 
   type VForm = { validate: () => Promise<{ valid: boolean }> }
- 
+
   const birthDateFieldRules = computed(() => [
     () => {
       for (const r of rules.birthDate) {
@@ -32,7 +34,7 @@
   ])
 
   /* panels */
-  const openedPanels = ref<number[]>([0])
+  const openedPanels = ref<string[]>(['accessData'])
 
   /* refs */
   const formRef = ref<VForm | null>(null)
@@ -59,7 +61,7 @@
     cpf: '',
     rg: '',
     birthDate: null as Date | null,
-    gender: null as string | null,
+    gender: null as Gender | null,
     cep: '',
     address: '',
     city: '',
@@ -124,21 +126,63 @@
     { immediate: true }
   )
 
+  function runRules(ruleList: Array<(v: any) => true | string>, value: any) {
+    for (const rule of ruleList) {
+      const response = rule(value)
+      if (response !== true) return response
+    }
+    return true
+  }
+
+  function getPanelsWithErrors(): string[] {
+    const panels = new Set<string>()
+
+    // DADOS DE ACESSO
+    if (runRules(rules.email, form.email) !== true) panels.add('accessData')
+    
+    // DADOS PESSOAIS
+    if (runRules(rules.fullName, form.fullName) !== true) panels.add('personalData')
+    if (runRules(rules.gender, form.gender) !== true) panels.add('personalData')
+
+    for (const fn of birthDateFieldRules.value) {
+      if (fn() !== true) {
+        panels.add('personalData')
+        break
+      }
+    }
+
+    // DOCUMENTOS 
+    if (rules.cpf && runRules(rules.cpf, form.cpf) !== true) panels.add('documents')
+
+    return [...panels]
+  }
+
   async function createAccount() {
 
+    // 1) abre painéis que certamente têm erro (mesmo fechados)
+    const panelsToOpen = getPanelsWithErrors()
+    if (panelsToOpen.length) {
+      openedPanels.value = Array.from(new Set([...openedPanels.value, ...panelsToOpen]))
+      await nextTick() // espera o Vue renderizar os campos dos painéis abertos
+    }
+
+    // 2) valida o que estiver montado agora (inclui os painéis recém-abertos)
     const validation = await formRef.value?.validate()
     if (validation && !validation.valid) {
       notify('Revise os campos obrigatórios.')
       return
     }
 
+    // 3) segue fluxo normal
     const payload = {
       email: form.email.trim(),
       password: form.password.trim(),
       userName: form.fullName.trim(),
       cpfNumber: form.cpf.replace(/\D/g, ''),
       birthDate: birthDateIso.value,
+      gender: form.gender,
     }
+        
 
     try {
       loading.value = true
@@ -189,7 +233,7 @@
               <v-form ref="formRef" @submit.prevent="createAccount">
                 <v-expansion-panels v-model="openedPanels" multiple class="mb-6 panels">
                   <!-- DADOS DE ACESSO -->
-                  <v-expansion-panel class="panel">
+                  <v-expansion-panel class="panel" value="accessData">
                     <v-expansion-panel-title class="section-title">
                       Dados de acesso
                     </v-expansion-panel-title>
@@ -204,7 +248,7 @@
                                     rounded="lg"
                                     density="comfortable"
                                     :rules="rules.email"
-                                    clearable/>
+                                    clearable />
 
                       <v-text-field v-model="form.password"
                                     label="Senha"
@@ -237,17 +281,17 @@
                                     variant="outlined"
                                     rounded="lg"
                                     density="comfortable"
-                                    clearable/>
+                                    clearable />
                     </v-expansion-panel-text>
                   </v-expansion-panel>
 
                   <!-- DADOS PESSOAIS -->
-                  <v-expansion-panel class="panel">
+                  <v-expansion-panel class="panel" value="personalData">
                     <v-expansion-panel-title class="section-title">
                       Dados pessoais
                     </v-expansion-panel-title>
 
-                    <v-expansion-panel-text>
+                    <v-expansion-panel-text eager>
                       <v-text-field v-model="form.fullName"
                                     label="Nome completo"
                                     class="mb-4"
@@ -255,7 +299,7 @@
                                     rounded="lg"
                                     density="comfortable"
                                     clearable
-                                    :rules="rules.fullName"/>
+                                    :rules="rules.fullName" />
                       <v-row>
                         <v-col cols="12" sm="7">
                           <v-menu v-model="birthMenu"
@@ -294,26 +338,25 @@
                   </v-expansion-panel>
 
                   <!-- DOCUMENTOS -->
-                  <v-expansion-panel class="panel">
+                  <v-expansion-panel class="panel" value="documents">
                     <v-expansion-panel-title class="section-title">
                       Documentos
                     </v-expansion-panel-title>
 
                     <v-expansion-panel-text>
-                      <v-text-field v-model="form.cpf"
-                                    label="CPF"
-                                    class="mb-4"
-                                    hint="Somente números"
-                                    persistent-hint
-                                    variant="outlined"
-                                    rounded="lg"
-                                    density="comfortable" />
+                      <CpfField v-model="form.cpf"
+                                :rules="rules.cpf"
+                                class="mb-4"
+                                variant="outlined"
+                                rounded="lg"
+                                density="comfortable"
+                                clearable />
                     </v-expansion-panel-text>
                   </v-expansion-panel>
 
 
                   <!-- ENDEREÇO -->
-                  <v-expansion-panel class="panel">
+                  <v-expansion-panel class="panel" value="address">
                     <v-expansion-panel-title class="section-title">
                       Endereço
                     </v-expansion-panel-title>
@@ -359,7 +402,7 @@
                   </v-expansion-panel>
 
                   <!-- CONTATO -->
-                  <v-expansion-panel class="panel">
+                  <v-expansion-panel class="panel" value="contact">
                     <v-expansion-panel-title class="section-title">
                       Contato
                     </v-expansion-panel-title>
@@ -575,13 +618,13 @@
     margin: 0;
   }
 
-  .password-rules li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-    font-size: 0.92rem;
-    color: rgba(31, 27, 22, 0.86);
-  }
+    .password-rules li {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.92rem;
+      color: rgba(31, 27, 22, 0.86);
+    }
 
   .rule-ok {
     color: #214b3a;

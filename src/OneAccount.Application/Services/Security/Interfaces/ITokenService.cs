@@ -1,4 +1,4 @@
-﻿namespace OneAccount.Application.Services.Interfaces;
+﻿namespace OneAccount.Application.Services.Security.Interfaces;
 
 public interface ITokenService
 {

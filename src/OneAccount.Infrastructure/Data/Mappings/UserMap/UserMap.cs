@@ -30,7 +30,7 @@ public sealed class UserMap : IEntityTypeConfiguration<User>
         {
             pw.Property(p => p.Password)
               .HasColumnName("PasswordHash")
-              .HasMaxLength(256) // ajuste conforme tamanho do hash
+              .HasMaxLength(1024) 
               .IsRequired();
         });
 

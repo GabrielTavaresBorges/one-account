@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using OneAccount.Domain.Enumerators;
 
 namespace OneAccount.Application.UseCases.Users.Commands.Create;
 
@@ -19,5 +20,9 @@ public sealed class CommandValidator : AbstractValidator<Command>
         RuleFor(x => x.CpfNumber)
             .NotEmpty()
             .Length(11);
+
+        RuleFor(x => x.Gender)
+            .IsInEnum()
+            .NotEqual(Gender.Unknown);
     }
 }

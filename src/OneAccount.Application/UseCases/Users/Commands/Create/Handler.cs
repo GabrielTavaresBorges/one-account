@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using OneAccount.Application.Services.Security.Interfaces;
 using OneAccount.Domain.Abstraction.Exceptions;
 using OneAccount.Domain.Abstraction.Interfaces;
 using OneAccount.Domain.Abstraction.Records;
@@ -18,12 +19,18 @@ public sealed class Handler : IRequestHandler<Command, Result<Response>>
     private readonly IUserRepository _userRepository;
     private readonly IUnityOfWork _unitOfWork;
     private readonly ILogger<Handler> _logger;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public Handler(IUserRepository usersRepository, IUnityOfWork unitOfWork, ILogger<Handler> logger)
+    public Handler(
+        IUserRepository usersRepository,
+        IUnityOfWork unitOfWork,
+        ILogger<Handler> logger,
+        IPasswordHasher passwordHasher)
     {
         _userRepository = usersRepository;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result<Response>> Handle(Command command, CancellationToken cancellationToken)
@@ -36,11 +43,15 @@ public sealed class Handler : IRequestHandler<Command, Result<Response>>
                 return Result<Response>.Failure(emailResult.Error);
             }
 
-            var passwordResult = PasswordHash.Create(command.Password);
-            if ( passwordResult.IsFailure)
-            {
-                return Result<Response>.Failure(passwordResult.Error);
-            }
+            var plainPasswordResult = PlainPassword.Create(command.Password);
+            if (plainPasswordResult.IsFailure)
+                return Result<Response>.Failure(plainPasswordResult.Error);
+
+            var hashed = _passwordHasher.Hash(plainPasswordResult.Value.Password);
+
+            var passwordHashResult = PasswordHash.Create(hashed);
+            if (passwordHashResult.IsFailure)
+                return Result<Response>.Failure(passwordHashResult.Error);
 
             var userNameResult = UserName.Create(command.UserName);
             if (userNameResult.IsFailure)
@@ -62,7 +73,7 @@ public sealed class Handler : IRequestHandler<Command, Result<Response>>
 
             var user = User.Create(
                 emailAddress: emailResult.Value,
-                passwordHash: passwordResult.Value,
+                passwordHash: passwordHashResult.Value,
                 userName: userNameResult.Value,
                 cpfNumber: cpfResult.Value,
                 birthDate: birhDateResult.Value,
