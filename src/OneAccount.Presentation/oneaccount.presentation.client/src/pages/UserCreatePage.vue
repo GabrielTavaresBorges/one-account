@@ -18,7 +18,8 @@
 
   import { createUser } from '@/services/users/users-service'
   import { rules } from '@/validators'
-  import { GenderSelect, CpfField } from '@/components/inputs'
+  import { EmailField, PasswordField, GenderSelect, CpfField } from '@/components/inputs'
+  import { PasswordHelpDialog } from '@/components/dialogs'
   import type { Gender } from '@/constants/gender'
 
   type VForm = { validate: () => Promise<{ valid: boolean }> }
@@ -26,8 +27,8 @@
   const birthDateFieldRules = computed(() => [
     () => {
       for (const r of rules.birthDate) {
-        const res = r(form.birthDate)
-        if (res !== true) return res
+        const response = r(form.birthDate)
+        if (response !== true) return response
       }
       return true
     },
@@ -103,28 +104,16 @@
     return `${y}-${m}-${d}`
   })
 
-  const passwordRules = ref([
-    { text: 'Mínimo de 8 caracteres', valid: false },
-    { text: '1 letra maiúscula', valid: false },
-    { text: '1 letra minúscula', valid: false },
-    { text: '1 número', valid: false },
-    { text: '1 caractere especial (ex: @, #, $).', valid: false },
-  ])
-
-  watch(
-    () => form.password,
-    (p) => {
-      const pwd = p ?? ''
-      passwordRules.value = [
-        { text: 'Mínimo de 8 caracteres', valid: pwd.length >= 8 },
-        { text: '1 letra maiúscula', valid: upperRegex.test(pwd) },
-        { text: '1 letra minúscula', valid: lowerRegex.test(pwd) },
-        { text: '1 número', valid: digitRegex.test(pwd) },
-        { text: '1 caractere especial (ex: @, #, $).', valid: specialRegex.test(pwd) },
-      ]
-    },
-    { immediate: true }
-  )
+  const passwordChecklist = computed(() => {
+    const pwd = form.password ?? ''
+    return [
+      { text: 'Mínimo de 8 caracteres', valid: pwd.trim().length >= 8 },
+      { text: '1 letra maiúscula', valid: /[A-Z]/.test(pwd) },
+      { text: '1 letra minúscula', valid: /[a-z]/.test(pwd) },
+      { text: '1 número', valid: /\d/.test(pwd) },
+      { text: '1 caractere especial (ex: @, #, $).', valid: /[^A-Za-z0-9]/.test(pwd) },
+    ]
+  })
 
   function runRules(ruleList: Array<(v: any) => true | string>, value: any) {
     for (const rule of ruleList) {
@@ -139,7 +128,7 @@
 
     // DADOS DE ACESSO
     if (runRules(rules.email, form.email) !== true) panels.add('accessData')
-    
+
     // DADOS PESSOAIS
     if (runRules(rules.fullName, form.fullName) !== true) panels.add('personalData')
     if (runRules(rules.gender, form.gender) !== true) panels.add('personalData')
@@ -151,7 +140,7 @@
       }
     }
 
-    // DOCUMENTOS 
+    // DOCUMENTOS
     if (rules.cpf && runRules(rules.cpf, form.cpf) !== true) panels.add('documents')
 
     return [...panels]
@@ -182,7 +171,7 @@
       birthDate: birthDateIso.value,
       gender: form.gender,
     }
-        
+
 
     try {
       loading.value = true
@@ -239,28 +228,22 @@
                     </v-expansion-panel-title>
 
                     <v-expansion-panel-text>
-                      <v-text-field v-model="form.email"
-                                    label="Email"
-                                    type="email"
-                                    :prepend-inner-icon="mdiEmail"
-                                    class="mb-4"
-                                    variant="outlined"
-                                    rounded="lg"
-                                    density="comfortable"
-                                    :rules="rules.email"
-                                    clearable />
+                      <EmailField v-model="form.email"
+                                  :rules="rules.email"
+                                  class="mb-4"
+                                  variant="outlined"
+                                  rounded="lg"
+                                  density="comfortable"
+                                  clearable />
 
-                      <v-text-field v-model="form.password"
-                                    label="Senha"
-                                    :type="showPassword ? 'text' : 'password'"
-                                    :prepend-inner-icon="mdiLock"
-                                    :append-inner-icon="showPassword ? mdiEyeOff : mdiEye"
-                                    @click:append-inner="showPassword = !showPassword"
-                                    class="mb-2"
-                                    variant="outlined"
-                                    rounded="lg"
-                                    density="comfortable"
-                                    clearable>
+                      <PasswordField v-model="form.password"
+                                     :rules="rules.password"
+                                     label="Senha"
+                                     class="mb-2"
+                                     variant="outlined"
+                                     rounded="lg"
+                                     density="comfortable"
+                                     clearable>
                         <template #append>
                           <v-btn variant="text"
                                  class="help-icon-btn"
@@ -270,18 +253,16 @@
                             <v-icon :icon="mdiHelpCircleOutline" size="20" />
                           </v-btn>
                         </template>
-                      </v-text-field>
+                      </PasswordField>
 
-                      <v-text-field v-model="form.confirmPassword"
-                                    label="Confirmar senha"
-                                    :type="showConfirmPassword ? 'text' : 'password'"
-                                    :prepend-inner-icon="mdiLock"
-                                    :append-inner-icon="showConfirmPassword ? mdiEyeOff : mdiEye"
-                                    @click:append-inner="showConfirmPassword = !showConfirmPassword"
-                                    variant="outlined"
-                                    rounded="lg"
-                                    density="comfortable"
-                                    clearable />
+                      <PasswordField v-model="form.confirmPassword"
+                                     label="Confirmar senha"
+                                     :match="form.password"
+                                     class="mb-0"
+                                     variant="outlined"
+                                     rounded="lg"
+                                     density="comfortable"
+                                     clearable />
                     </v-expansion-panel-text>
                   </v-expansion-panel>
 
@@ -437,37 +418,8 @@
                 </v-snackbar>
 
                 <!-- DIALOG AJUDA SENHA -->
-                <v-dialog v-model="passwordHelp" max-width="520">
-                  <v-card rounded="xl">
-                    <v-card-title class="password-dialog-title">
-                      <v-icon :icon="mdiShieldLockOutline" size="22" class="mr-2" />
-                      Requisitos de segurança
-                    </v-card-title>
-
-                    <v-card-text>
-                      <p class="password-description">
-                        Para sua segurança, crie uma senha com pelo menos <strong>8 caracteres</strong>,
-                        combinando letras maiúsculas, minúsculas, números e um caractere especial.
-                      </p>
-
-                      <ul class="password-rules">
-                        <li v-for="rule in passwordRules" :key="rule.text">
-                          <v-icon size="18"
-                                  :icon="rule.valid ? mdiCheckCircle : mdiCircleOutline"
-                                  class="mr-2"
-                                  :class="rule.valid ? 'rule-ok' : 'rule-pending'" />
-                          {{ rule.text }}
-                        </li>
-                      </ul>
-                    </v-card-text>
-
-                    <v-card-actions class="justify-end">
-                      <v-btn variant="text" class="btn-ghost" @click="passwordHelp = false">
-                        Entendi
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
+                <PasswordHelpDialog v-model="passwordHelp"
+                                    :rules="passwordChecklist" />
               </v-form>
             </div>
           </v-card>
