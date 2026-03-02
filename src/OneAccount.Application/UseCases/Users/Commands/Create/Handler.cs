@@ -4,10 +4,10 @@ using OneAccount.Application.Services.Security.Interfaces;
 using OneAccount.Domain.Abstraction.Exceptions;
 using OneAccount.Domain.Abstraction.Interfaces;
 using OneAccount.Domain.Abstraction.Records;
-using OneAccount.Domain.Entities.User;
+using OneAccount.Domain.Entities.UserPhones;
+using OneAccount.Domain.Entities.Users;
 using OneAccount.Domain.Repositories.UsersRepository;
 using OneAccount.Domain.ValueObjects.Dates;
-using OneAccount.Domain.ValueObjects.Documents;
 using OneAccount.Domain.ValueObjects.Emails;
 using OneAccount.Domain.ValueObjects.Names;
 using OneAccount.Domain.ValueObjects.Security;
@@ -57,12 +57,6 @@ public sealed class Handler : IRequestHandler<Command, Result<Response>>
             if (userNameResult.IsFailure)
             {
                 return Result<Response>.Failure(userNameResult.Error);
-            }            
-
-            var cpfResult = Cpf.Create(command.CpfNumber);
-            if (cpfResult.IsFailure)
-            {
-                return Result<Response>.Failure(cpfResult.Error);
             }
 
             var birhDateResult = BirthDate.Create(command.BirthDate);
@@ -71,13 +65,22 @@ public sealed class Handler : IRequestHandler<Command, Result<Response>>
                 return Result<Response>.Failure(birhDateResult.Error);
             }
 
+            var initialPhone = UserPhone.Create(
+               callingCode: command.CallingCode,
+               regionCode: command.RegionCode,
+               areaCode: command.AreaCode,
+               phoneType: command.PhoneType,
+               phoneNumber: command.PhoneNumber,
+               e164: command.E164,
+               isPrimary: true);
+
             var user = User.Create(
                 emailAddress: emailResult.Value,
                 passwordHash: passwordHashResult.Value,
                 userName: userNameResult.Value,
-                cpfNumber: cpfResult.Value,
                 birthDate: birhDateResult.Value,
-                gender: command.Gender);
+                gender: command.Gender,
+                initialPhone: initialPhone);
 
             await _userRepository.CreateUserAsync(user, cancellationToken);
             await _unitOfWork.CommitAsync();

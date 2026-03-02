@@ -334,54 +334,6 @@
                                 clearable />
                     </v-expansion-panel-text>
                   </v-expansion-panel>
-
-
-                  <!-- ENDEREÇO -->
-                  <v-expansion-panel class="panel" value="address">
-                    <v-expansion-panel-title class="section-title">
-                      Endereço
-                    </v-expansion-panel-title>
-
-                    <v-expansion-panel-text>
-                      <v-row>
-                        <v-col cols="12" md="4">
-                          <v-text-field v-model="form.cep"
-                                        label="CEP"
-                                        class="mb-4"
-                                        variant="outlined"
-                                        rounded="lg"
-                                        density="comfortable" />
-                        </v-col>
-
-                        <v-col cols="12" md="8">
-                          <v-text-field v-model="form.address"
-                                        label="Endereço"
-                                        class="mb-4"
-                                        variant="outlined"
-                                        rounded="lg"
-                                        density="comfortable" />
-                        </v-col>
-
-                        <v-col cols="12" md="8">
-                          <v-text-field v-model="form.city"
-                                        label="Cidade"
-                                        class="mb-4"
-                                        variant="outlined"
-                                        rounded="lg"
-                                        density="comfortable" />
-                        </v-col>
-
-                        <v-col cols="12" md="4">
-                          <v-text-field v-model="form.state"
-                                        label="Estado"
-                                        variant="outlined"
-                                        rounded="lg"
-                                        density="comfortable" />
-                        </v-col>
-                      </v-row>
-                    </v-expansion-panel-text>
-                  </v-expansion-panel>
-
                   <!-- CONTATO -->
                   <v-expansion-panel class="panel" value="contact">
                     <v-expansion-panel-title class="section-title">

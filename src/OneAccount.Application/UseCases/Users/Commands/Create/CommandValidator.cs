@@ -17,10 +17,6 @@ public sealed class CommandValidator : AbstractValidator<Command>
             .MaximumLength(150)
             .EmailAddress();
 
-        RuleFor(x => x.CpfNumber)
-            .NotEmpty()
-            .Length(11);
-
         RuleFor(x => x.Gender)
             .IsInEnum()
             .NotEqual(Gender.Unknown);

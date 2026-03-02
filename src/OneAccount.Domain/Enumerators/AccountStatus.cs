@@ -2,8 +2,9 @@
 
 public enum AccountStatus
 {
-    Unknown,   // Desconhecido
-    Active,    // Ativo
-    Suspended, // Suspenso
-    Disabled   // Desativado
+    Unknown,                  // Desconhecido
+    PendingEmailConfirmation, // Pendente de verificação de email
+    Active,                   // Ativo 
+    Suspended,                // Suspenso
+    Disabled                  // Desativado
 }
