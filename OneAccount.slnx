@@ -9,4 +9,8 @@
     </Project>
     <Project Path="src/OneAccount.Presentation/OneAccount.Presentation.Server/OneAccount.Presentation.Server.csproj" Id="b662ecef-e463-41be-ae4c-e026458c4ce6" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OneAccount.Application.UnitTests/OneAccount.Application.UnitTests.csproj" Id="0391847c-2e63-4ecf-ab8a-b55102f9527d" />
+    <Project Path="tests/OneAccount.Domain.UnitTests/OneAccount.Domain.UnitTests.csproj" Id="f4902d9b-0c4f-4928-84c9-c87865f224bb" />
+  </Folder>
 </Solution>

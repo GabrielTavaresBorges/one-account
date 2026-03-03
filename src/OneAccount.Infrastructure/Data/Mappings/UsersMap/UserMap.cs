@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using OneAccount.Domain.Entities.User;
+using OneAccount.Domain.Entities.Users;
 using OneAccount.Domain.Enumerators;
 using OneAccount.Domain.ValueObjects.Accounts;
 
-namespace OneAccount.Infrastructure.Data.Mappings.UserMap;
+namespace OneAccount.Infrastructure.Data.Mappings.UsersMap;
 
 public sealed class UserMap : IEntityTypeConfiguration<User>
 {
