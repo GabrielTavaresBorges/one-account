@@ -27,7 +27,6 @@ public sealed class CommandValidator : AbstractValidator<Command>
             .Must(d => d <= DateOnly.FromDateTime(DateTime.UtcNow))
             .WithMessage("BirthDate cannot be in the future.");
 
-
         RuleFor(x => x.Gender)
             .IsInEnum()
             .NotEqual(Gender.Unknown);

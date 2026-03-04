@@ -1,8 +1,6 @@
 ﻿using OneAccount.Domain.Abstraction;
 using OneAccount.Domain.Abstraction.Exceptions;
-using OneAccount.Domain.Abstraction.Records;
 using OneAccount.Domain.Enumerators;
-using System.Xml.Linq;
 
 namespace OneAccount.Domain.Entities.UserPhones;
 
