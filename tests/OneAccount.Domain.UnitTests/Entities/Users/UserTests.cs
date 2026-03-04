@@ -6,7 +6,6 @@ using OneAccount.Domain.ValueObjects.Dates;
 using OneAccount.Domain.ValueObjects.Emails;
 using OneAccount.Domain.ValueObjects.Names;
 using OneAccount.Domain.ValueObjects.Security;
-using System.Numerics;
 
 namespace OneAccount.Application.UnitTests.Entities.Users;
 
