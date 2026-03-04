@@ -7,8 +7,7 @@ export type UserId = string
 export type UserCreateCore = {
   email: string
   password: string
-  userName: string  
-  cpfNumber: string
+  userName: string 
   birthDate: string
 }
 

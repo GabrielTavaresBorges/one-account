@@ -18,7 +18,7 @@
 
   import { createUser } from '@/services/users/users-service'
   import { rules } from '@/validators'
-  import { EmailField, PasswordField, GenderSelect, CpfField } from '@/components/inputs'
+  import { EmailField, PasswordField, GenderSelect, UserPhonesField } from '@/components/inputs'
   import { PasswordHelpDialog } from '@/components/dialogs'
   import type { Gender } from '@/constants/gender'
 
@@ -36,7 +36,7 @@
 
   /* panels */
   const openedPanels = ref<string[]>(['accessData'])
-
+  
   /* refs */
   const formRef = ref<VForm | null>(null)
   const loading = ref(false)
@@ -58,16 +58,18 @@
     email: '',
     password: '',
     confirmPassword: '',
-    fullName: '',
-    cpf: '',
-    rg: '',
+    fullName: '',    
     birthDate: null as Date | null,
-    gender: null as Gender | null,
-    cep: '',
-    address: '',
-    city: '',
-    state: '',
-    phone: '',
+    gender: null as Gender | null,   
+    phones: [] as Array<{
+      callingCode: string
+      regionCode: string
+      areaCode: string | null
+      phoneType: number
+      phoneNumber: string
+      e164: string
+      isPrimary: boolean
+    }>,
   })
 
   /* password rules visuals */
@@ -123,6 +125,23 @@
     return true
   }
 
+  function hasAtLeastOneValidPhone(): boolean {
+  if (!form.phones || form.phones.length === 0) return false
+
+  const p = form.phones[0]
+  if (!p) return false
+
+  const rawNumber = (p.phoneNumber ?? '').replace(/\D/g, '')
+
+  const callingOk = /^\+\d{1,3}$/.test((p.callingCode ?? '').trim())
+  const regionOk = /^[A-Z]{2}$/.test((p.regionCode ?? '').trim().toUpperCase())
+  const typeOk = p.phoneType === 1 || p.phoneType === 2
+  const numOk = rawNumber.length >= 8
+  const e164Ok = /^\+\d{8,15}$/.test((p.e164 ?? '').trim())
+
+  return callingOk && regionOk && typeOk && numOk && e164Ok
+}
+
   function getPanelsWithErrors(): string[] {
     const panels = new Set<string>()
 
@@ -140,8 +159,10 @@
       }
     }
 
-    // DOCUMENTOS
-    if (rules.cpf && runRules(rules.cpf, form.cpf) !== true) panels.add('documents')
+    // CONTATO    
+    if (!hasAtLeastOneValidPhone()) {
+      panels.add('contact')
+    }
 
     return [...panels]
   }
@@ -167,11 +188,9 @@
       email: form.email.trim(),
       password: form.password.trim(),
       userName: form.fullName.trim(),
-      cpfNumber: form.cpf.replace(/\D/g, ''),
       birthDate: birthDateIso.value,
       gender: form.gender,
     }
-
 
     try {
       loading.value = true
@@ -317,23 +336,7 @@
                       </v-row>
                     </v-expansion-panel-text>
                   </v-expansion-panel>
-
-                  <!-- DOCUMENTOS -->
-                  <v-expansion-panel class="panel" value="documents">
-                    <v-expansion-panel-title class="section-title">
-                      Documentos
-                    </v-expansion-panel-title>
-
-                    <v-expansion-panel-text>
-                      <CpfField v-model="form.cpf"
-                                :rules="rules.cpf"
-                                class="mb-4"
-                                variant="outlined"
-                                rounded="lg"
-                                density="comfortable"
-                                clearable />
-                    </v-expansion-panel-text>
-                  </v-expansion-panel>
+                  
                   <!-- CONTATO -->
                   <v-expansion-panel class="panel" value="contact">
                     <v-expansion-panel-title class="section-title">
@@ -341,11 +344,9 @@
                     </v-expansion-panel-title>
 
                     <v-expansion-panel-text>
-                      <v-text-field v-model="form.phone"
-                                    label="Telefone"
-                                    variant="outlined"
-                                    rounded="lg"
-                                    density="comfortable" />
+                      <UserPhonesField v-model="form.phones"
+                                       :multiple="false"
+                                       :required="true" />
                     </v-expansion-panel-text>
                   </v-expansion-panel>
                 </v-expansion-panels>
