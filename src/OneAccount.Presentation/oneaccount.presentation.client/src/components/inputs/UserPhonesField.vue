@@ -70,36 +70,83 @@
 </template>-->
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { phoneTypeItems, type PhoneType } from '@/constants/phoneType'
+  import { computed, watch } from 'vue'
+
+  import { phoneTypeItems } from '@/constants/phoneType'
   import { callingCodeItems, type CallingCode } from '@/constants/callingCode'
   import { countryItems, type CountryCode } from '@/constants/country'
   import { brazilAreaCodes } from '@/constants/areaCode'
 
-  type PhoneModel = {
-    callingCode: CallingCode
-    country: CountryCode
-    phoneType: PhoneType
-    areaCode: string
-    number: string
-  }
+  import type { PhoneModel } from '@/models/phone-model'
+  import { validateUserPhone } from '@/validators/fields/userPhone'
 
-  const model = defineModel<PhoneModel | null>({ default: null })
+  import {
+    getCallingCodeByCountry,
+    resolveCountryFromCallingCode,
+  } from '@/services/phoneCountry/phone-country-service'
 
-  defineProps<{
+  const props = defineProps<{
     rules?: Array<(v: unknown) => true | string>
   }>()
 
+  const model = defineModel<PhoneModel>({
+    default: {
+      callingCode: '+55' as CallingCode,
+      country: 'BR' as CountryCode,
+      phoneType: 'Mobile',
+      areaCode: '',
+      number: '',
+    },
+  })
+
+  /* ===== Validation rules (campo inteiro) ===== */
+  const internalRules = computed(() => {
+    const base = props.rules ?? []
+
+    const myRule = () => validateUserPhone(model.value)
+
+    return [...base, myRule]
+  })
+
+  /* ===== Sync country <-> callingCode ===== */
+  let syncing = false
+
+  watch(
+    () => model.value.country,
+    (country) => {
+      if (syncing) return
+      syncing = true
+
+      // País define o DDI
+      model.value.callingCode = getCallingCodeByCountry(country)
+
+      syncing = false
+    }
+  )
+
+  watch(
+    () => model.value.callingCode,
+    (callingCode) => {
+      if (syncing) return
+      syncing = true
+
+      // DDI define (ou resolve) país
+      const resolved = resolveCountryFromCallingCode(callingCode, model.value.country)
+      if (resolved) model.value.country = resolved
+
+      syncing = false
+    }
+  )
+
   /* ===== Helpers ===== */
 
-  const isBrazil = computed(() => model.value?.country === 'BR')
+  const isBrazil = computed(() => model.value.country === 'BR')
 
   function digitsOnly(v: string) {
     return v.replace(/\D/g, '')
   }
 
   function onNumberInput(v: string) {
-    if (!model.value) return
     const digits = digitsOnly(v)
 
     if (model.value.phoneType === 'Landline') {
@@ -132,6 +179,7 @@
                 :items="callingCodeItems"
                 item-title="title"
                 item-value="value"
+                :rules="internalRules"
                 variant="outlined"
                 rounded="lg"
                 density="comfortable" />
@@ -144,15 +192,28 @@
                 :items="countryItems"
                 item-title="title"
                 item-value="value"
+                :rules="internalRules"
                 variant="outlined"
                 rounded="lg"
                 density="comfortable">
         <template #selection="{ item }">
-          {{ item.raw.flag }}
+          <v-img :src="item.raw.flagSrc"
+                 :alt="item.raw.alt"
+                 width="24"
+                 height="16"
+                 cover
+                 style="display:inline-block" />
         </template>
+
         <template #item="{ props, item }">
           <v-list-item v-bind="props">
-            {{ item.raw.flag }} {{ item.raw.title }}
+            <template #prepend>
+              <v-img :src="item.raw.flagSrc"
+                     :alt="item.raw.alt"
+                     width="24"
+                     height="16"
+                     cover />
+            </template>
           </v-list-item>
         </template>
       </v-select>
