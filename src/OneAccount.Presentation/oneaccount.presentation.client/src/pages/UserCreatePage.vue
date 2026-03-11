@@ -21,6 +21,7 @@
   import { EmailField, PasswordField, GenderSelect, UserPhonesField } from '@/components/inputs'
   import { PasswordHelpDialog } from '@/components/dialogs'
   import type { Gender } from '@/constants/gender'
+  import type { PhoneModel } from '@/models/phone-model'
 
   type VForm = { validate: () => Promise<{ valid: boolean }> }
 
@@ -61,15 +62,13 @@
     fullName: '',    
     birthDate: null as Date | null,
     gender: null as Gender | null,   
-    phones: [] as Array<{
-      callingCode: string
-      regionCode: string
-      areaCode: string | null
-      phoneType: number
-      phoneNumber: string
-      e164: string
-      isPrimary: boolean
-    }>,
+    phones: {
+      callingCode: '+55',
+      country: 'BR',
+      phoneType: 'Mobile',
+      areaCode: '11',
+      number: '',
+    } as PhoneModel,
   })
 
   /* password rules visuals */
@@ -126,21 +125,18 @@
   }
 
   function hasAtLeastOneValidPhone(): boolean {
-  if (!form.phones || form.phones.length === 0) return false
+    const p = form.phones
+    if (!p) return false
 
-  const p = form.phones[0]
-  if (!p) return false
+    const rawNumber = (p.number ?? '').replace(/\D/g, '')
+    const callingOk = /^\+\d{1,3}$/.test((p.callingCode ?? '').trim())
+    const countryOk = /^[A-Z]{2}$/.test((p.country ?? '').trim().toUpperCase())
+    const areaOk = (p.areaCode ?? '').trim().length > 0
+    const typeOk = p.phoneType === 'Mobile' || p.phoneType === 'Landline'
+    const numberOk = rawNumber.length > 0
 
-  const rawNumber = (p.phoneNumber ?? '').replace(/\D/g, '')
-
-  const callingOk = /^\+\d{1,3}$/.test((p.callingCode ?? '').trim())
-  const regionOk = /^[A-Z]{2}$/.test((p.regionCode ?? '').trim().toUpperCase())
-  const typeOk = p.phoneType === 1 || p.phoneType === 2
-  const numOk = rawNumber.length >= 8
-  const e164Ok = /^\+\d{8,15}$/.test((p.e164 ?? '').trim())
-
-  return callingOk && regionOk && typeOk && numOk && e164Ok
-}
+    return callingOk && countryOk && areaOk && typeOk && numberOk
+  }
 
   function getPanelsWithErrors(): string[] {
     const panels = new Set<string>()
@@ -183,13 +179,23 @@
       return
     }
 
+
+    const rawPhoneNumber = form.phones.number.replace(/\D/g, '')
+    const e164 = `${form.phones.callingCode}${form.phones.areaCode}${rawPhoneNumber}`
+
     // 3) segue fluxo normal
     const payload = {
       email: form.email.trim(),
       password: form.password.trim(),
       userName: form.fullName.trim(),
       birthDate: birthDateIso.value,
-      gender: form.gender,
+      gender: form.gender as Gender,
+      callingCode: form.phones.callingCode,
+      regionCode: form.phones.country,
+      areaCode: form.phones.areaCode,
+      phoneType: form.phones.phoneType,
+      phoneNumber: rawPhoneNumber,
+      e164,
     }
 
     try {

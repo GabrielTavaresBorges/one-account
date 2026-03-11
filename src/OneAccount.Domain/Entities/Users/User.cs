@@ -41,7 +41,7 @@ public class User : Entity, IAggregateRoot
     public DateTimeOffset? FirstLoginAt => _firstLoginAt;
     public DateTimeOffset? LastLoginAt => _lastLoginAt;
 
-    public IReadOnlyCollection<UserDocuments.UserDocument> Documents => _documents.AsReadOnly();
+    public IReadOnlyCollection<UserDocument> Documents => _documents.AsReadOnly();
     public IReadOnlyCollection<UserPhone> Phones => _phones.AsReadOnly();
 
     private User() { }

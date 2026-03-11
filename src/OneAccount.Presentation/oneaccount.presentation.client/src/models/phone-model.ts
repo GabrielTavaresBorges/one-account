@@ -9,5 +9,5 @@ export type PhoneModel = {
   country: CountryCode
   phoneType: PhoneType
   areaCode: string
-  number: string
-}
+  number: string,
+ }
