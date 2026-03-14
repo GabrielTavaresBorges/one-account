@@ -4,6 +4,7 @@ using OneAccount.Domain.Abstraction.Interfaces;
 using OneAccount.Domain.Entities.UserDocuments;
 using OneAccount.Domain.Entities.UserPhones;
 using OneAccount.Domain.Enumerators;
+using OneAccount.Domain.Events.Users;
 using OneAccount.Domain.ValueObjects.Accounts;
 using OneAccount.Domain.ValueObjects.Dates;
 using OneAccount.Domain.ValueObjects.Emails;
@@ -41,7 +42,7 @@ public class User : Entity, IAggregateRoot
     public DateTimeOffset? FirstLoginAt => _firstLoginAt;
     public DateTimeOffset? LastLoginAt => _lastLoginAt;
 
-    public IReadOnlyCollection<UserDocuments.UserDocument> Documents => _documents.AsReadOnly();
+    public IReadOnlyCollection<UserDocument> Documents => _documents.AsReadOnly();
     public IReadOnlyCollection<UserPhone> Phones => _phones.AsReadOnly();
 
     private User() { }
@@ -93,6 +94,12 @@ public class User : Entity, IAggregateRoot
 
         // Regra: no cadastro, esse telefone é obrigatório e deve ser primário
         user.AddPhone(initialPhone);
+
+        // Dispara evento de usuário registrado
+        user.AddDomainEvent(new UserRegisteredDomainEvent(
+            userId: user.Id,
+            email: user.Email.EmailAddress,
+            userName: user.UserName.Name));
 
         return user;
     }

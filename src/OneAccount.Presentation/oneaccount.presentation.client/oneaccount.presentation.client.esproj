@@ -10,5 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="src\components\FooterWatermark\" />
+    <Folder Include="src\services\phoneFormat\" />
   </ItemGroup>
 </Project>

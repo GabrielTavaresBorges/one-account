@@ -1,73 +1,4 @@
-<!-- src/components/inputs/UserPhoonesField.vue -->
-<!--<script setup lang="ts">
-  import { phoneTypeItems, type PhoneType } from '@/constants/phoneType'
-
-   const model = defineModel<PhoneType | null>({ default: null })
-
-
-  defineProps<{
-    label?: string
-    clearable?: boolean
-    disabled?: boolean
-    rules?: Array<(v: unknown) => true | string>
-  }>()
-</script>
-
-<template>
-
-  <v-select v-model="model"
-            :label="label ?? 'Área'"
-            :items="phoneTypeItems"
-            item-title="title"
-            item-value="value"
-            variant="outlined"
-            rounded="lg"
-            density="comfortable"
-            :clearable="clearable ?? true"
-            :disabled="disabled ?? false"
-            :rules="rules" />
-
-  <v-select v-model="model"
-            :label="label ?? 'País'"
-            :items="phoneTypeItems"
-            item-title="title"
-            item-value="value"
-            variant="outlined"
-            rounded="lg"
-            density="comfortable"
-            :clearable="clearable ?? true"
-            :disabled="disabled ?? false"
-            :rules="rules" />
-
-  <v-select v-model="model"
-            :label="label ?? 'Tipo'"
-            :items="phoneTypeItems"
-            item-title="title"
-            item-value="value"
-            variant="outlined"
-            rounded="lg"
-            density="comfortable"
-            :clearable="clearable ?? true"
-            :disabled="disabled ?? false"
-            :rules="rules" />
-
-  <v-select v-model="model"
-            :label="label ?? 'Região'"
-            :items="phoneTypeItems"
-            item-title="title"
-            item-value="value"
-            variant="outlined"
-            rounded="lg"
-            density="comfortable"
-            :clearable="clearable ?? true"
-            :disabled="disabled ?? false"
-            :rules="rules" />
-
-  <v-text-field>
-    label="label ?? 'Número'
-
-  </v-text-field>
-</template>-->
+<!-- src/components/inputs/UserPhonesField.vue -->
 
 <script setup lang="ts">
   import { computed, watch } from 'vue'
@@ -80,13 +11,13 @@
   import type { PhoneModel } from '@/models/phone-model'
   import { validateUserPhone } from '@/validators/fields/userPhone'
 
-  import {
-    getCallingCodeByCountry,
-    resolveCountryFromCallingCode,
-  } from '@/services/phoneCountry/phone-country-service'
+  import { getCallingCodeByCountry, resolveCountryFromCallingCode, } from '@/services/phoneCountry/phone-country-service'
+  import { formatPhoneNumber, getPhoneNumberMaxLength, } from '@/services/phoneFormat/phone-format-service'
 
   const props = defineProps<{
     rules?: Array<(v: unknown) => true | string>
+    multiple?: boolean
+    required?: boolean
   }>()
 
   const model = defineModel<PhoneModel>({
@@ -94,7 +25,7 @@
       callingCode: '+55' as CallingCode,
       country: 'BR' as CountryCode,
       phoneType: 'Mobile',
-      areaCode: '',
+      areaCode: '11',
       number: '',
     },
   })
@@ -106,6 +37,16 @@
     const myRule = () => validateUserPhone(model.value)
 
     return [...base, myRule]
+  })
+
+  const numberPlaceholder = computed(() => {
+    if (model.value.callingCode === '+55' && model.value.country === 'BR') {
+      return model.value.phoneType === 'Landline'
+        ? '0000-00-00'
+        : '00000-00-00'
+    }
+
+    return ''
   })
 
   /* ===== Sync country <-> callingCode ===== */
@@ -138,35 +79,33 @@
     }
   )
 
+  watch(
+    () => model.value.phoneType,
+    () => {
+      model.value.number = ''
+    }
+  )
+
   /* ===== Helpers ===== */
 
-  const isBrazil = computed(() => model.value.country === 'BR')
-
-  function digitsOnly(v: string) {
-    return v.replace(/\D/g, '')
-  }
+  const isBrazil = computed(() => model.value.country === 'BR')    
 
   function onNumberInput(v: string) {
-    const digits = digitsOnly(v)
-
-    if (model.value.phoneType === 'Landline') {
-      model.value.number = formatLandline(digits)
-    } else {
-      model.value.number = formatMobile(digits)
-    }
+    model.value.number = formatPhoneNumber({
+      callingCode: model.value.callingCode,
+      country: model.value.country,
+      phoneType: model.value.phoneType,
+      value: v,
+    })
   }
 
-  function formatMobile(d: string) {
-    d = d.slice(0, 9)
-    if (d.length <= 5) return d
-    return `${d.slice(0, 5)}-${d.slice(5)}`
-  }
-
-  function formatLandline(d: string) {
-    d = d.slice(0, 8)
-    if (d.length <= 4) return d
-    return `${d.slice(0, 4)}-${d.slice(4)}`
-  }
+  const numberMaxLength = computed(() =>
+    getPhoneNumberMaxLength(
+      model.value.callingCode,
+      model.value.country,
+      model.value.phoneType,
+    ),
+  )
 </script>
 
 <template>
@@ -239,13 +178,15 @@
                 :items="brazilAreaCodes"
                 variant="outlined"
                 rounded="lg"
-                density="comfortable" />
+                density="comfortable"
+                clearable/>
       <v-text-field v-else
                     v-model="model.areaCode"
                     label="Área"
                     variant="outlined"
                     rounded="lg"
-                    density="comfortable" />
+                    density="comfortable"
+                    clearable />
     </v-col>
 
     <!-- Número -->
@@ -255,6 +196,9 @@
                     variant="outlined"
                     rounded="lg"
                     density="comfortable"
+                    clearable
+                    :placeholder="numberPlaceholder"
+                    :maxlength="numberMaxLength"
                     @update:model-value="onNumberInput" />
     </v-col>
 

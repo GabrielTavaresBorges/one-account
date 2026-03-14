@@ -5,7 +5,7 @@ using OneAccount.Infrastructure.Identity.Models;
 
 namespace OneAccount.Infrastructure.Identity.Services;
 
-public sealed class TokenService(UserManager<ApplicationUser> userManager, IConfiguration configuration) : ITokenService
+public sealed class JwtTokenService(UserManager<ApplicationUser> userManager, IConfiguration configuration) : IJwtTokenService
 {
     // TODO:
     // Implementar geração de JWT seguindo as configurações definidas em JwtConfiguration.
@@ -29,7 +29,7 @@ public sealed class TokenService(UserManager<ApplicationUser> userManager, IConf
     // - Policies configuradas em AuthorizationPolicies
     // - Validações definidas em JwtConfiguration
 
-    Task<string> ITokenService.GenerateTokenAsync(Guid userId)
+    Task<string> IJwtTokenService.GenerateTokenAsync(Guid userId)
     {
         throw new NotImplementedException();
     }

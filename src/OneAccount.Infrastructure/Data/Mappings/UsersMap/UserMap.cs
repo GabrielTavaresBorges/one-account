@@ -41,7 +41,7 @@ public sealed class UserMap : IEntityTypeConfiguration<User>
         builder.OwnsOne(o => o.UserName, name =>
         {
             name.Property(p => p.Name)
-                .HasColumnName("Name")
+                .HasColumnName("UserName")
                 .HasMaxLength(100)
                 .IsRequired();
         });

@@ -1,4 +1,7 @@
-// src/services/users/users.types.ts
+// src/services/users/users-types.ts
+
+import type { Gender } from "../../constants/gender"
+import type { PhoneType } from "@/constants/phoneType"
 
 /** Identificador de User (GUID em string no client) */
 export type UserId = string
@@ -9,6 +12,13 @@ export type UserCreateCore = {
   password: string
   userName: string 
   birthDate: string
+  gender: Gender
+  callingCode: string
+  regionCode: string
+  areaCode: string
+  phoneType: PhoneType
+  phoneNumber: string
+  e164: string,
 }
 
 /** ===== CREATE ===== */
