@@ -97,9 +97,9 @@ public class User : Entity, IAggregateRoot
 
         // Dispara evento de usuário registrado
         user.AddDomainEvent(new UserRegisteredDomainEvent(
-            userId: user.Id,
-            email: user.Email.EmailAddress,
-            userName: user.UserName.Name));
+            UserId: user.Id,
+            Email: user.Email.EmailAddress,
+            UserName: user.UserName.Name));
 
         return user;
     }

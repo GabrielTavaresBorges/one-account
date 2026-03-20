@@ -1,8 +1,15 @@
-﻿namespace OneAccount.Domain.Abstraction;
+﻿using OneAccount.Domain.Abstraction.Events;
+
+namespace OneAccount.Domain.Abstraction;
 
 public abstract class Entity : IEquatable<Entity>
 {
+    private readonly List<IDomainEvent> _domainEvents = new();
+
     public Guid Id { get; protected set; }
+
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+
 
     protected Entity()
     {
@@ -12,6 +19,18 @@ public abstract class Entity : IEquatable<Entity>
     protected Entity(Guid id)
     {
         Id = id;
+    }
+
+    protected void AddDomainEvent(IDomainEvent domainEvent)
+    {
+        ArgumentNullException.ThrowIfNull(domainEvent);
+        _domainEvents.Add(domainEvent);
+    }
+
+    public void ClearDomainEvents(IDomainEvent domainEvent)
+    {
+        ArgumentNullException.ThrowIfNull(domainEvent);
+        _domainEvents.Clear();
     }
 
     public bool Equals(Entity? other)

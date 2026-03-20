@@ -30,7 +30,7 @@ public sealed partial record Email
         if (string.IsNullOrWhiteSpace(email))
         {
             return Result<string>.Failure(new Error(
-                Identifier: "EMAIL_EMPTY",
+                Identifier: "EMAIL_NULL_EMPTY",
                 Message: "Email is required. " +
                          "Please provide an address in the format 'example@domain.com'."));
         }
@@ -44,7 +44,7 @@ public sealed partial record Email
             return Result<string>.Failure(new Error(
                 Identifier: "EMAIL_TOO_LONG",
                 Message: "Email is too long. " +
-                         $"Current length: {email.Length} characters." +
+                         $"Current length: {email.Length} characters. " +
                          $"Maximum allowed length: {MaxLength} characters."));
         }
 
@@ -54,7 +54,7 @@ public sealed partial record Email
             return Result<string>.Failure(new Error(
                 Identifier: "EMAIL_INVALID_FORMAT",
                 Message: "Email format is invalid. " +
-                        $"Expected format: 'example@domain.com'." +
+                        $"Expected format: 'example@domain.com'. " +
                         $"Received value: '{email}'."));
         }
 
