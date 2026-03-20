@@ -1,3 +1,8 @@
-﻿namespace OneAccount.Domain.Events.Users;
+﻿using OneAccount.Domain.Abstraction.Events;
 
-public sealed record UserRegisteredDomainEvent(Guid userId, string email, string userName);
+namespace OneAccount.Domain.Events.Users;
+
+public sealed record UserRegisteredDomainEvent(
+    Guid UserId,
+    string Email,
+    string UserName) : DomainEvent;
