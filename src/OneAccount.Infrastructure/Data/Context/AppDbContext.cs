@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OneAccount.Domain.Entities.EmailConfirmationTokens;
 using OneAccount.Domain.Entities.Users;
 
 namespace OneAccount.Infrastructure.Data.Context;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<User> User => Set<User>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<EmailConfirmationToken> EmailConfirmationTokens => Set<EmailConfirmationToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

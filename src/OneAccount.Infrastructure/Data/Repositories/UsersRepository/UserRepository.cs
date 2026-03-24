@@ -16,17 +16,17 @@ public sealed class UserRepository : IUserRepository
 
     public async Task CreateUserAsync(User user, CancellationToken cancellationToken)
     {
-        await _context.User.AddAsync(user, cancellationToken);
+        await _context.Users.AddAsync(user, cancellationToken);
     }
 
     public Task UpdateUserAsync(User user, CancellationToken cancellationToken)
     {
-        _context.User.Update(user);
+        _context.Users.Update(user);
         return Task.CompletedTask;
     }
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.User.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        return await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 }
