@@ -1,10 +1,11 @@
 ﻿using OneAccount.Domain.Abstraction;
 using OneAccount.Domain.Abstraction.Exceptions;
+using OneAccount.Domain.Abstraction.Interfaces;
 using OneAccount.Domain.ValueObjects.Security;
 
 namespace OneAccount.Domain.Entities.EmailConfirmations;
 
-public sealed class EmailConfirmationToken : Entity
+public sealed class EmailConfirmationToken : Entity, IAggregateRoot
 {
     private Guid _userId;
     private TokenHash _tokenHash = null!;

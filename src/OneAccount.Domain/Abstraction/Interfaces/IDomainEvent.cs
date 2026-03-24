@@ -2,5 +2,5 @@
 
 public interface IDomainEvent
 {
-    DateTime OccurredOnUtc { get; }
+    DateTimeOffset OccurredOnUtc { get; }
 }
