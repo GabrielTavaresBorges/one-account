@@ -3,7 +3,7 @@ using OneAccount.Domain.Abstraction.Exceptions;
 using OneAccount.Domain.Abstraction.Interfaces;
 using OneAccount.Domain.ValueObjects.Security;
 
-namespace OneAccount.Domain.Entities.EmailConfirmations;
+namespace OneAccount.Domain.Entities.EmailConfirmationTokens;
 
 public sealed class EmailConfirmationToken : Entity, IAggregateRoot
 {

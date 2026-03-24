@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OneAccount.Domain.Entities.EmailConfirmations;
+using OneAccount.Domain.Entities.EmailConfirmationTokens;
 using OneAccount.Domain.Entities.Users;
 
 namespace OneAccount.Infrastructure.Data.Context;

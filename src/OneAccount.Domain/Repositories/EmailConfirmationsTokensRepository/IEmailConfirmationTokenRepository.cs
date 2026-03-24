@@ -1,4 +1,4 @@
-﻿using OneAccount.Domain.Entities.EmailConfirmations;
+﻿using OneAccount.Domain.Entities.EmailConfirmationTokens;
 
 namespace OneAccount.Domain.Repositories.EmailConfirmationsTokensRepository;
 

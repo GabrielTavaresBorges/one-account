@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using OneAccount.Domain.Entities.EmailConfirmations;
+using OneAccount.Domain.Entities.EmailConfirmationTokens;
 
-namespace OneAccount.Infrastructure.Data.Mappings.EmailConfirmationsTokenMap;
+namespace OneAccount.Infrastructure.Data.Mappings.EmailConfirmationTokensMap;
 
 public sealed class EmailConfirmationTokenMap : IEntityTypeConfiguration<EmailConfirmationToken>
 {

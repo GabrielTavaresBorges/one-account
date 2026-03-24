@@ -2,5 +2,5 @@
 
 public abstract record DomainEvent : IDomainEvent
 {
-    public DateTime OccurredOnUtc { get; init; } = DateTime.UtcNow;
+    public DateTimeOffset OccurredOnUtc { get; init; } = DateTime.UtcNow;
 }

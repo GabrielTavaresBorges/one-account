@@ -1,8 +1,8 @@
-﻿using OneAccount.Domain.Entities.EmailConfirmations;
+﻿using OneAccount.Domain.Entities.EmailConfirmationTokens;
 using OneAccount.Domain.Repositories.EmailConfirmationsTokensRepository;
 using OneAccount.Infrastructure.Data.Context;
 
-namespace OneAccount.Infrastructure.Data.Repositories.EmailConfirmationsTokensRepository;
+namespace OneAccount.Infrastructure.Data.Repositories.EmailConfirmationTokensRepository;
 
 public sealed class EmailConfirmationTokenRepository : IEmailConfirmationTokenRepository
 {
