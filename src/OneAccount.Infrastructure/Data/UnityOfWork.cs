@@ -30,16 +30,16 @@ public sealed class UnityOfWork : IUnityOfWork
             .SelectMany(entity => entity.DomainEvents)
             .ToList();
 
+        foreach (var entity in entitiesWithEvents)
+        {
+            entity.ClearDomainEvents();
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
 
         if (domainEvents.Count == 0)
             return;
 
         await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
-
-        foreach (var entity in entitiesWithEvents)
-        {
-            entity.ClearDomainEvents();
-        }
     }
 }
