@@ -3,11 +3,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OneAccount.Application.Services.Security.Interfaces;
 using OneAccount.Domain.Abstraction.Interfaces;
-using OneAccount.Domain.Repositories.EmailConfirmationsTokensRepository;
+using OneAccount.Domain.Repositories.EmailConfirmationTokensRepository;
 using OneAccount.Domain.Repositories.UsersRepository;
 using OneAccount.Infrastructure.Data;
 using OneAccount.Infrastructure.Data.Context;
-using OneAccount.Infrastructure.Data.Repositories.EmailConfirmationsTokensRepository;
+using OneAccount.Infrastructure.Data.DomainEvents.Dispatchers;
+using OneAccount.Infrastructure.Data.DomainEvents.Publishers;
+using OneAccount.Infrastructure.Data.Repositories.EmailConfirmationTokensRepository;
 using OneAccount.Infrastructure.Data.Repositories.UserRepository;
 using OneAccount.Infrastructure.Identity.Services;
 
@@ -20,7 +22,8 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
         if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException("Connection string 'DefaultConnection' não encontrada. Verifique appsettings.json (Presentation.Server).");
+            throw new InvalidOperationException(
+                "Connection string 'DefaultConnection' não encontrada. Verifique appsettings.json (Presentation.Server).");
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
@@ -36,6 +39,8 @@ public static class DependencyInjection
 
         // Services
         services.AddScoped<IEmailConfirmationTokenService, EmailConfirmationTokenService>();
+        services.AddScoped<DomainEventDispatcher>();
+        services.AddScoped<MediatRDomainEventPublisher>();
 
         return services;
     }

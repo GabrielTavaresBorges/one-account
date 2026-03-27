@@ -27,9 +27,8 @@ public abstract class Entity : IEquatable<Entity>
         _domainEvents.Add(domainEvent);
     }
 
-    public void ClearDomainEvents(IDomainEvent domainEvent)
+    public void ClearDomainEvents()
     {
-        ArgumentNullException.ThrowIfNull(domainEvent);
         _domainEvents.Clear();
     }
 

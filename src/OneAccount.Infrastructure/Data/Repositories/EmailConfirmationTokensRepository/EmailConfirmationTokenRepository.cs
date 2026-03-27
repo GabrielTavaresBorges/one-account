@@ -1,5 +1,5 @@
 ﻿using OneAccount.Domain.Entities.EmailConfirmationTokens;
-using OneAccount.Domain.Repositories.EmailConfirmationsTokensRepository;
+using OneAccount.Domain.Repositories.EmailConfirmationTokensRepository;
 using OneAccount.Infrastructure.Data.Context;
 
 namespace OneAccount.Infrastructure.Data.Repositories.EmailConfirmationTokensRepository;
@@ -13,7 +13,9 @@ public sealed class EmailConfirmationTokenRepository : IEmailConfirmationTokenRe
         _context = context;
     }
 
-    public async Task CreateEmailConfirmationTokenAsync(EmailConfirmationToken emailConfirmationToken, CancellationToken cancellationToken)
+    public async Task CreateEmailConfirmationTokenAsync(
+        EmailConfirmationToken emailConfirmationToken,
+        CancellationToken cancellationToken)
     {
         await _context.EmailConfirmationTokens.AddAsync(emailConfirmationToken, cancellationToken);
     }
