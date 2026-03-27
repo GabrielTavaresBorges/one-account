@@ -58,44 +58,7 @@ public sealed class UserPhone : Entity
         string e164,
         bool isPrimary)
     {
-        callingCode = (callingCode ?? string.Empty).Trim();
-        regionCode = (regionCode ?? string.Empty).Trim().ToUpperInvariant();
-        areaCode = string.IsNullOrWhiteSpace(areaCode) ? null : areaCode.Trim();
-        phoneNumber = (phoneNumber ?? string.Empty).Trim();
-        e164 = (e164 ?? string.Empty).Trim();
-
-        if (string.IsNullOrWhiteSpace(callingCode))
-            throw new DomainException(message: "CallingCode cannot be null or empty.", identifier: "PHONE_CALLING_CODE_EMPTY");
-
-        if (!callingCode.StartsWith("+") || callingCode.Length < 2 || callingCode.Skip(1).Any(ch => !char.IsDigit(ch)))
-            throw new DomainException(message: "CallingCode must be in format +<digits> (e.g., +55, +1).", identifier: "PHONE_CALLING_CODE_INVALID");
-
-        if (string.IsNullOrWhiteSpace(regionCode))
-            throw new DomainException(message: "RegionCode cannot be null or empty.", identifier: "PHONE_REGION_EMPTY");
-
-        // ISO2 básico: 2 letras (BR/US/CA)
-        if (regionCode.Length != 2 || regionCode.Any(ch => ch < 'A' || ch > 'Z'))
-            throw new DomainException(message: "RegionCode must be a valid ISO2 code (e.g., BR, US, CA).", identifier: "PHONE_REGION_INVALID");
-
-        // AreaCode é opcional (nullable). Se vier preenchido, valida básico: só dígitos.
-        if (areaCode is not null && areaCode.Any(ch => !char.IsDigit(ch)))
-            throw new DomainException(message: "AreaCode must contain digits only.", identifier: "PHONE_AREA_CODE_INVALID");
-
-        if (phoneType == PhoneType.Unknown)
-            throw new DomainException(message: "Phone type cannot be unknown.", identifier: "PHONE_TYPE_UNKNOWN");
-
-        if (string.IsNullOrWhiteSpace(phoneNumber))
-            throw new DomainException(message: "Phone number cannot be null or empty.", identifier: "PHONE_NUMBER_EMPTY");
-
-        if (phoneNumber.Any(ch => !char.IsDigit(ch)))
-            throw new DomainException(message: "Phone number must contain digits only.", identifier: "PHONE_NUMBER_INVALID");
-
-        if (string.IsNullOrWhiteSpace(e164))
-            throw new DomainException(message: "E164 cannot be null or empty.", identifier: "PHONE_E164_EMPTY");
-
-        // E.164 básico: '+' seguido de dígitos (validação oficial fica na libphonenumber)
-        if (!e164.StartsWith("+") || e164.Length < 2 || e164.Skip(1).Any(ch => !char.IsDigit(ch)))
-            throw new DomainException(message: "E164 must be in format +<digits>.", identifier: "PHONE_E164_INVALID");
+       Validated(callingCode, regionCode, areaCode, phoneType, phoneNumber, e164, isPrimary);
 
         return new UserPhone(callingCode, regionCode, areaCode, phoneType, phoneNumber, e164, isPrimary);
     }
@@ -108,41 +71,7 @@ public sealed class UserPhone : Entity
          string phoneNumber,
          string e164)
     {
-        callingCode = (callingCode ?? string.Empty).Trim();
-        regionCode = (regionCode ?? string.Empty).Trim().ToUpperInvariant();
-        areaCode = string.IsNullOrWhiteSpace(areaCode) ? null : areaCode.Trim();
-        phoneNumber = (phoneNumber ?? string.Empty).Trim();
-        e164 = (e164 ?? string.Empty).Trim();
-
-        if (string.IsNullOrWhiteSpace(callingCode))
-            throw new DomainException(message: "CallingCode cannot be null or empty.", identifier: "PHONE_CALLING_CODE_EMPTY");
-
-        if (!callingCode.StartsWith("+") || callingCode.Length < 2 || callingCode.Skip(1).Any(ch => !char.IsDigit(ch)))
-            throw new DomainException(message: "CallingCode must be in format +<digits> (e.g., +55, +1).", identifier: "PHONE_CALLING_CODE_INVALID");
-
-        if (string.IsNullOrWhiteSpace(regionCode))
-            throw new DomainException(message: "RegionCode cannot be null or empty.", identifier: "PHONE_REGION_EMPTY");
-
-        if (regionCode.Length != 2 || regionCode.Any(ch => ch < 'A' || ch > 'Z'))
-            throw new DomainException(message: "RegionCode must be a valid ISO2 code (e.g., BR, US, CA).", identifier: "PHONE_REGION_INVALID");
-
-        if (areaCode is not null && areaCode.Any(ch => !char.IsDigit(ch)))
-            throw new DomainException(message: "AreaCode must contain digits only.", identifier: "PHONE_AREA_CODE_INVALID");
-
-        if (phoneType == PhoneType.Unknown)
-            throw new DomainException(message: "Phone type cannot be unknown.", identifier: "PHONE_TYPE_UNKNOWN");
-
-        if (string.IsNullOrWhiteSpace(phoneNumber))
-            throw new DomainException(message: "Phone number cannot be null or empty.", identifier: "PHONE_NUMBER_EMPTY");
-
-        if (phoneNumber.Any(ch => !char.IsDigit(ch)))
-            throw new DomainException(message: "Phone number must contain digits only.", identifier: "PHONE_NUMBER_INVALID");
-
-        if (string.IsNullOrWhiteSpace(e164))
-            throw new DomainException(message: "E164 cannot be null or empty.", identifier: "PHONE_E164_EMPTY");
-
-        if (!e164.StartsWith("+") || e164.Length < 2 || e164.Skip(1).Any(ch => !char.IsDigit(ch)))
-            throw new DomainException(message: "E164 must be in format +<digits>.", identifier: "PHONE_E164_INVALID");
+        Validated(callingCode, regionCode, areaCode, phoneType, phoneNumber, e164, isPrimary: _isPrimary);
 
         var changed =
             _callingCode != callingCode ||
@@ -167,13 +96,84 @@ public sealed class UserPhone : Entity
         _verifiedAt = null;
     }
 
+    private static void Validated(
+        string callingCode,
+        string regionCode,
+        string? areaCode,
+        PhoneType phoneType,
+        string phoneNumber,
+        string e164,
+        bool isPrimary)
+    {
+        callingCode = (callingCode ?? string.Empty).Trim();
+        regionCode = (regionCode ?? string.Empty).Trim().ToUpperInvariant();
+        areaCode = string.IsNullOrWhiteSpace(areaCode) ? null : areaCode.Trim();
+        phoneNumber = (phoneNumber ?? string.Empty).Trim();
+        e164 = (e164 ?? string.Empty).Trim();
+
+        if (string.IsNullOrWhiteSpace(callingCode))
+            throw new DomainException(
+                message: "CallingCode cannot be null or empty.", 
+                identifier: "PHONE_CALLING_CODE_EMPTY");
+
+        if (!callingCode.StartsWith("+") || callingCode.Length < 2 || callingCode.Skip(1).Any(ch => !char.IsDigit(ch)))
+            throw new DomainException(
+                message: "CallingCode must be in format +<digits> (e.g., +55, +1).",
+                identifier: "PHONE_CALLING_CODE_INVALID");
+
+        if (string.IsNullOrWhiteSpace(regionCode))
+            throw new DomainException(
+                message: "RegionCode cannot be null or empty.",
+                identifier: "PHONE_REGION_EMPTY");
+
+        // ISO2 básico: 2 letras (BR/US/CA)
+        if (regionCode.Length != 2 || regionCode.Any(ch => ch < 'A' || ch > 'Z'))
+            throw new DomainException(
+                message: "RegionCode must be a valid ISO2 code (e.g., BR, US, CA).",
+                identifier: "PHONE_REGION_INVALID");
+
+        // AreaCode é opcional (nullable). Se vier preenchido, valida básico: só dígitos.
+        if (areaCode is not null && areaCode.Any(ch => !char.IsDigit(ch)))
+            throw new DomainException(
+                message: "AreaCode must contain digits only.",
+                identifier: "PHONE_AREA_CODE_INVALID");
+
+        if (phoneType == PhoneType.Unknown)
+            throw new DomainException(
+                message: "Phone type cannot be unknown.", 
+                identifier: "PHONE_TYPE_UNKNOWN");
+
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+            throw new DomainException(
+                message: "Phone number cannot be null or empty.",
+                identifier: "PHONE_NUMBER_EMPTY");
+
+        if (phoneNumber.Any(ch => !char.IsDigit(ch)))
+            throw new DomainException(
+                message: "Phone number must contain digits only.", 
+                identifier: "PHONE_NUMBER_INVALID");
+
+        if (string.IsNullOrWhiteSpace(e164))
+            throw new DomainException(
+                message: "E164 cannot be null or empty.",
+                identifier: "PHONE_E164_EMPTY");
+
+        // E.164 básico: '+' seguido de dígitos (validação oficial fica na libphonenumber)
+        if (!e164.StartsWith("+") || e164.Length < 2 || e164.Skip(1).Any(ch => !char.IsDigit(ch)))
+            throw new DomainException(
+                message: "E164 must be in format +<digits>.", 
+                identifier: "PHONE_E164_INVALID");
+    }
+
     internal void MarkVerified(DateTimeOffset verifiedAtUtc)
     {
         if (_isVerified)
             return;
 
         if (verifiedAtUtc == default)
-            throw new DomainException(message: "VerifiedAt cannot be default.", identifier: "PHONE_VERIFIED_AT_INVALID");
+            throw new DomainException(
+                message: "VerifiedAt cannot be default.",
+                identifier: "PHONE_VERIFIED_AT_INVALID");
 
         _isVerified = true;
         _verifiedAt = verifiedAtUtc;

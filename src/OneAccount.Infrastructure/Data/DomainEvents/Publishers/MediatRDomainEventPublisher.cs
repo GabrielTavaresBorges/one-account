@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OneAccount.Application.Events.Notifications;
 using OneAccount.Domain.Abstraction.Events;
 
 namespace OneAccount.Infrastructure.Data.DomainEvents.Publishers;

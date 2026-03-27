@@ -1,10 +1,9 @@
 ﻿using MediatR;
 using OneAccount.Domain.Abstraction.Events;
 
-namespace OneAccount.Infrastructure.Data.DomainEvents.Publishers;
+namespace OneAccount.Application.Events.Notifications;
 
-public sealed class DomainEventNotification<TDomainEvent> : INotification
-    where TDomainEvent : IDomainEvent
+public sealed class DomainEventNotification<TDomainEvent> : INotification where TDomainEvent : IDomainEvent
 {
     public TDomainEvent DomainEvent { get; }
 
