@@ -17,48 +17,58 @@ public sealed class UserPhonesMap : IEntityTypeConfiguration<UserPhone>
             .IsRequired();
         builder.HasIndex("UserId");
 
+        // ===== CallingCode =====
         builder.Property(p => p.CallingCode)
             .HasColumnName("CallingCode")
             .HasMaxLength(6)
             .IsRequired();
 
+        // ===== RegionCode =====
         builder.Property(p => p.RegionCode)
             .HasColumnName("RegionCode")
             .HasMaxLength(2)
             .IsRequired();
 
+        // ===== AreaCode =====
         builder.Property(p => p.AreaCode)
             .HasColumnName("AreaCode")
             .HasMaxLength(10);
 
+        // ===== PhoneType =====
         builder.Property(p => p.PhoneType)
             .HasColumnName("PhoneType")
             .HasConversion<string>()
             .HasMaxLength(50)
             .IsRequired();
 
+        // ===== E164 =====
         builder.Property(p => p.E164)
             .HasColumnName("E164")
             .HasMaxLength(30)
             .IsRequired();
 
+        // ===== PhoneNumber =====
         builder.Property(p => p.PhoneNumber)
             .HasColumnName("PhoneNumber")
             .HasMaxLength(30)
             .IsRequired();
 
+        // ===== IsVerified =====
         builder.Property(p => p.IsVerified)
             .HasColumnName("IsVerified")
             .IsRequired();
 
+        // ===== VerifiedAt =====
         builder.Property(p => p.VerifiedAt)
             .HasColumnName("VerifiedAt")
             .HasColumnType("datetimeoffset");
 
+        // ===== IsPrimary =====
         builder.Property(p => p.IsPrimary)
             .HasColumnName("IsPrimary")
             .IsRequired();
 
+        // ===== CreatedAt =====
         builder.Property(p => p.CreatedAt)
             .HasColumnName("CreatedAt")
             .HasColumnType("datetimeoffset")

@@ -34,15 +34,36 @@ public sealed record SuspensionInfo
         DateTimeOffset? suspendedUntil = null,
         string? note = null)
     {
+        Validate(reason, by, suspendedAt, suspendedUntil, note);
+
+        return new SuspensionInfo(
+            reason: reason,
+            by: by,
+            suspendedAt: suspendedAt,
+            suspendedUntil: suspendedUntil,
+            note: note
+        );
+    }
+
+    private static void Validate(
+        SuspensionReason reason,
+        SuspensionBy by,
+        DateTimeOffset suspendedAt,
+        DateTimeOffset? suspendedUntil,
+        string? note)
+    {
         if (reason == SuspensionReason.Unknown)
-            throw new DomainException(message:"Suspension reason cannot be Unknown.", identifier:"SUSPENSION_REASON_INVALID");
+            throw new DomainException(
+                message:"Suspension reason cannot be Unknown.",
+                identifier:"SUSPENSION_REASON_INVALID");
 
         if (by == SuspensionBy.Unknown)
-            throw new DomainException(message:"Suspension 'By' cannot be Unknown.", identifier:"SUSPENSION_BY_INVALID");
+            throw new DomainException(
+                message:"Suspension 'By' cannot be Unknown.",
+                identifier:"SUSPENSION_BY_INVALID");
 
         // normaliza note
         note = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
-
         const int MaxNoteLength = 500;
         if (note is not null && note.Length > MaxNoteLength)
             throw new DomainException(
@@ -53,14 +74,6 @@ public sealed record SuspensionInfo
             throw new DomainException(
                 message:"SuspendedUntil must be greater than SuspendedAt.",
                 identifier:"SUSPENSION_UNTIL_INVALID");
-
-        return new SuspensionInfo(
-            reason: reason,
-            by: by,
-            suspendedAt: suspendedAt,
-            suspendedUntil: suspendedUntil,
-            note: note
-        );
     }
 
     public bool IsExpired(DateTimeOffset nowUtc)

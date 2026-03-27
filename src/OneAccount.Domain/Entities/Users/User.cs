@@ -10,6 +10,8 @@ using OneAccount.Domain.ValueObjects.Dates;
 using OneAccount.Domain.ValueObjects.Emails;
 using OneAccount.Domain.ValueObjects.Names;
 using OneAccount.Domain.ValueObjects.Security;
+using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Headers;
 
 namespace OneAccount.Domain.Entities.Users;
 
@@ -72,23 +74,7 @@ public class User : Entity, IAggregateRoot
         Gender gender,
         UserPhone initialPhone)
     {
-        if (emailAddress is null)
-            throw new DomainException(message: "Email Address cannot be null.", identifier: "EMAIL_NULL");
-
-        if (passwordHash is null)
-            throw new DomainException(message: "Password cannot be null.", identifier: "PASSWORD_HASH_NULL");
-
-        if (userName is null)
-            throw new DomainException(message: "UserName cannot be null.", identifier: "USER_NAME_NULL");
-
-        if (birthDate is null)
-            throw new DomainException(message: "Birth date cannot be null.", identifier: "BIRTH_DATE_NULL");
-
-        if (gender == Gender.Unknown)
-            throw new DomainException(message: "Gender cannot be unknown.", identifier: "GENDER_UNKNOWN");
-
-        if (initialPhone is null)
-            throw new DomainException(message: "Initial phone cannot be null.", identifier: "INITIAL_PHONE_NULL");
+        Validate(emailAddress, passwordHash, userName, birthDate, gender, initialPhone);
 
         var user = new User(emailAddress, passwordHash, userName, birthDate, gender);
 
@@ -104,16 +90,59 @@ public class User : Entity, IAggregateRoot
         return user;
     }
 
+    private static void Validate(
+        Email emailAddress,
+        PasswordHash passwordHash,
+        UserName userName,
+        BirthDate birthDate,
+        Gender gender,
+        UserPhone initialPhone)
+    {
+        if (emailAddress is null)
+            throw new DomainException(
+                message: "Email Address cannot be null.", 
+                identifier: "EMAIL_NULL");
+
+        if (passwordHash is null)
+            throw new DomainException(
+                message: "Password cannot be null.", 
+                identifier: "PASSWORD_HASH_NULL");
+
+        if (userName is null)
+            throw new DomainException(
+                message: "UserName cannot be null.", 
+                identifier: "USER_NAME_NULL");
+
+        if (birthDate is null)
+            throw new DomainException(
+                message: "Birth date cannot be null.",
+                identifier: "BIRTH_DATE_NULL");
+
+        if (gender == Gender.Unknown)
+            throw new DomainException(
+                message: "Gender cannot be unknown.", 
+                identifier: "GENDER_UNKNOWN");
+
+        if (initialPhone is null)
+            throw new DomainException(
+                message: "Initial phone cannot be null.", 
+                identifier: "INITIAL_PHONE_NULL");
+    }
+
     #region Phones (Aggregate rules)
 
     public void AddPhone(UserPhone phone)
     {
         if (phone is null)
-            throw new DomainException(message: "Phone cannot be null.", identifier: "PHONE_NULL");
+            throw new DomainException(
+                message: "Phone cannot be null.",
+                identifier: "PHONE_NULL");
 
         // Dedup pelo seu índice (E164)
         if (_phones.Any(p => p.E164 == phone.E164))
-            throw new DomainException(message: "Phone already exists.", identifier: "PHONE_ALREADY_EXISTS");
+            throw new DomainException(
+                message: "Phone already exists.",
+                identifier: "PHONE_ALREADY_EXISTS");
 
         // Se já existe primário e o novo vem como primário, desmarca o atual
         if (phone.IsPrimary)
@@ -134,7 +163,9 @@ public class User : Entity, IAggregateRoot
     public void ChangeEmail(Email email)
     {
         if (email is null)
-            throw new DomainException(message: "Email cannot be null.", identifier: "EMAIL_NULL");
+            throw new DomainException(
+                message: "Email cannot be null.", 
+                identifier: "EMAIL_NULL");
 
         _email = email;
     }
