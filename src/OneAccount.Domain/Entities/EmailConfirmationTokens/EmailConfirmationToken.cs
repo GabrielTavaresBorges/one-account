@@ -31,6 +31,13 @@ public sealed class EmailConfirmationToken : Entity, IAggregateRoot
 
     public static EmailConfirmationToken Create(Guid userId, TokenHash tokenHash, DateTimeOffset expiresAt)
     {
+         Validate(userId, tokenHash, expiresAt);
+
+        return new EmailConfirmationToken(userId, tokenHash, expiresAt);
+    }
+
+    private static void Validate(Guid userId, TokenHash tokenHash, DateTimeOffset expiresAt)
+    {
         if (userId == Guid.Empty)
             throw new DomainException(
                 message: "UserId cannot be empty.",
@@ -45,8 +52,6 @@ public sealed class EmailConfirmationToken : Entity, IAggregateRoot
             throw new DomainException(
                 message: "Expiration date must be in the future.",
                 identifier: "TOKEN_EXPIRATION_INVALID");
-
-        return new EmailConfirmationToken(userId, tokenHash, expiresAt);
     }
 
     public bool IsExpired(DateTimeOffset nowUtc)
